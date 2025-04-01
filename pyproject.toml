@@ -1,7 +1,7 @@
 [project]
 name = "napari-data-inspection"
 dynamic = ["version"]
-description = "Data Inspection Plugin"
+description = "Data Inspection Plugin, designed to streamline file navigation and enhance the efficiency of data inspection."
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
@@ -26,9 +26,12 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
-    "magicgui",
     "qtpy",
-    "scikit-image",
+    "napari_toolkit",
+    "blosc2",
+    "SimpleITK",
+    "tifffile",
+    "scikit-image"
 ]
 
 [project.optional-dependencies]
@@ -45,10 +48,10 @@ testing = [
 napari-data-inspection = "napari_data_inspection:napari.yaml"
 
 [project.urls]
-"Bug Tracker" = "https://github.com/Lars-Kraemer/napari-data-inspection/issues"
-"Documentation" = "https://github.com/Lars-Kraemer/napari-data-inspection#README.md"
-"Source Code" = "https://github.com/Lars-Kraemer/napari-data-inspection"
-"User Support" = "https://github.com/Lars-Kraemer/napari-data-inspection/issues"
+"Bug Tracker" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection/issues"
+"Documentation" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection#README.md"
+"Source Code" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection"
+"User Support" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection/issues"
 
 [build-system]
 requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]
@@ -70,11 +73,11 @@ fallback_version = "0.0.1+nogit"
 
 
 [tool.black]
-line-length = 79
+line-length = 100
 target-version = ['py310', 'py311', 'py312', 'py313']
 
 [tool.ruff]
-line-length = 79
+line-length = 100
 lint.select = [
     "E", "F", "W", #flake8
     "UP", # pyupgrade

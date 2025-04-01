@@ -3,28 +3,12 @@ display_name: Data Inspection
 # use 'hidden' to remove plugin from napari hub search results
 visibility: public
 # see https://napari.org/stable/plugins/technical_references/manifest.html#fields for valid categories
-categories: ["Annotation", "Segmentation", "Acquisition"]
+categories: ["Utilities"]
 contributions:
   commands:
-    - id: napari-data-inspection.make_container_widget
-      python_name: napari_data_inspection:ImageThreshold
-      title: Make threshold Container widget
-    - id: napari-data-inspection.make_magic_widget
-      python_name: napari_data_inspection:threshold_magic_widget
-      title: Make threshold magic widget
-    - id: napari-data-inspection.make_function_widget
-      python_name: napari_data_inspection:threshold_autogenerate_widget
-      title: Make threshold function widget
-    - id: napari-data-inspection.make_qwidget
-      python_name: napari_data_inspection:ExampleQWidget
-      title: Make example QWidget
+    - id: napari-data-inspection.DataInspectionWidget
+      python_name: napari_data_inspection:DataInspectionWidget
+      title: Data Inspection Widget
   widgets:
-    - command: napari-data-inspection.make_container_widget
-      display_name: Container Threshold
-    - command: napari-data-inspection.make_magic_widget
-      display_name: Magic Threshold
-    - command: napari-data-inspection.make_function_widget
-      autogenerate: true
-      display_name: Autogenerate Threshold
-    - command: napari-data-inspection.make_qwidget
-      display_name: Example QWidget
+    - command: napari-data-inspection.DataInspectionWidget
+      display_name: Data Inspection Widget
