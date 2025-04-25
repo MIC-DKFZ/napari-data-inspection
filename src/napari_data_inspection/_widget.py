@@ -81,6 +81,7 @@ class DataInspectionWidget(QWidget):
         self.keep_camera = setup_checkbox(None, "Keep Camera", False)
         self.keep_color = setup_checkbox(None, "Keep ColorMap", True)
         _ = hstack(_layout, [self.keep_camera, self.keep_color])
+        self.keep_properties = setup_checkbox(_layout, "Keep Properties", True)
         # _ = setup_iconbutton(_layout, "Load", "right_arrow", function=self.run)
 
         # Add Layer
@@ -212,6 +213,7 @@ class DataInspectionWidget(QWidget):
 
     def maybe_load_data(self, layer_block):
         cmap = None
+        props = {}
 
         file = layer_block[self.index]
         file_name = str(Path(file).name).replace(layer_block.dtype, "")
@@ -224,15 +226,47 @@ class DataInspectionWidget(QWidget):
             elif layer.name.startswith(f"{layer_block.name} - "):
                 if get_value(self.keep_color):
                     cmap = layer.colormap.copy()
+                if get_value(self.keep_properties) and isinstance(layer, Image):
+                    props = {
+                        "opacity": layer.opacity,
+                        "blending": layer.blending,
+                        "contrast_limits": layer.contrast_limits,
+                        "gamma": layer.gamma,
+                        "colormap": layer.colormap,
+                        "interpolation2d": layer.interpolation2d,
+                        "interpolation3d": layer.interpolation3d,
+                        "depiction":layer.depiction,
+                        "rendering": layer.rendering,
+                    }
+                elif get_value(self.keep_color) and isinstance(layer, Labels):
+                    props = {
+                        "opacity": layer.opacity,
+                        "blending": layer.blending,
+                        "selected_label": layer.selected_label,
+                        "brush_size": layer.brush_size,
+                        "rendering": layer.rendering,
+                        "_color_mode": layer._color_mode,
+                        "contour": layer.contour,
+                        "n_edit_dimensions": layer.n_edit_dimensions,
+                        "contiguous": layer.contiguous,
+                        "preserve_labels": layer.preserve_labels,
+                        "show_selected_label": layer.show_selected_label,
+                    }
+                    # ,"contrast_limits": layer.contrast_limits
                 self.viewer.layers.remove(layer)
 
         data, affine = load_data(file, layer_block.dtype)
 
         if layer_block.ltype == "Image":
             layer = Image(data=data, affine=affine, name=layer_name)
+            for key, value in props.items():
+                setattr(layer, key, value)
+
             self.viewer.add_layer(layer)
         elif layer_block.ltype == "Labels":
             layer = Labels(data=data, affine=affine, name=layer_name)
+            for key, value in props.items():
+                setattr(layer, key, value)
             if get_value(self.keep_color) and cmap is not None:
                 layer.colormap = cmap
             self.viewer.add_layer(layer)
@@ -259,6 +293,7 @@ class DataInspectionWidget(QWidget):
                 "project_name": get_value(self.project_name),
                 "keep_camera": get_value(self.keep_camera),
                 "keep_color": get_value(self.keep_color),
+                "keep_properties": get_value(self.keep_properties),
                 "layers": layer_configs,
             }
 
@@ -283,8 +318,9 @@ class DataInspectionWidget(QWidget):
                 global_config = json.load(f)
 
             set_value(self.project_name, global_config["project_name"])
-            set_value(self.keep_camera, global_config["keep_camera"])
-            set_value(self.keep_color, global_config["keep_color"])
+            set_value(self.keep_camera, global_config.get("keep_camera",False))
+            set_value(self.keep_color, global_config.get("keep_color",True))
+            set_value(self.keep_properties, global_config.get("keep_properties",True))
 
             for config in global_config["layers"]:
                 self.add_layer(config)
