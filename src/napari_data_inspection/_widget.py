@@ -81,7 +81,7 @@ class DataInspectionWidget(QWidget):
         self.keep_camera = setup_checkbox(None, "Keep Camera", False)
         self.keep_color = setup_checkbox(None, "Keep ColorMap", True)
         _ = hstack(_layout, [self.keep_camera, self.keep_color])
-        self.keep_properties = setup_checkbox(_layout, "Keep Properties", True)
+        self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
         # _ = setup_iconbutton(_layout, "Load", "right_arrow", function=self.run)
 
         # Add Layer
