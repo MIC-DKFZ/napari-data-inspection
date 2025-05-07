@@ -9,7 +9,6 @@ from napari_toolkit.widgets import (
     setup_progressbaredit,
     setup_pushbutton,
 )
-from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
 
 from napari_data_inspection.widgets.layers_block_widget import setup_layerblock

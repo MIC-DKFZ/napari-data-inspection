@@ -1,28 +1,8 @@
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-import numpy as np
-from napari.layers import Image, Labels
-from napari_toolkit.containers import setup_scrollarea, setup_vgroupbox
-from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.utils import get_value, set_value
-from napari_toolkit.widgets import (
-    setup_checkbox,
-    setup_iconbutton,
-    setup_lineedit,
-    setup_progressbaredit,
-    setup_pushbutton,
-)
-from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import QFileDialog, QShortcut, QSizePolicy, QVBoxLayout, QWidget
-
-from napari_data_inspection._widget_gui import DataInspectionWidget_GUI
-from napari_data_inspection.utils.data_loading import load_data
-from napari_data_inspection.widgets.layers_block_widget import setup_layerblock
-
-if TYPE_CHECKING:
-    import napari
+from qtpy.QtWidgets import QFileDialog
 
 from napari_data_inspection._widget_navigation import DataInspectionWidget_LC
 

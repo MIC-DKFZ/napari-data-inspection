@@ -1,26 +1,14 @@
-import json
 import threading
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
-from napari.layers import Image, Labels
-from napari_toolkit.containers import setup_scrollarea, setup_vgroupbox
-from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.utils import get_value, set_value
-from napari_toolkit.widgets import (
-    setup_checkbox,
-    setup_iconbutton,
-    setup_lineedit,
-    setup_progressbaredit,
-    setup_pushbutton,
-)
 from qtpy.QtGui import QKeySequence
-from qtpy.QtWidgets import QFileDialog, QShortcut, QSizePolicy, QVBoxLayout, QWidget
+from qtpy.QtWidgets import QShortcut
 
 from napari_data_inspection._widget_gui import DataInspectionWidget_GUI
 from napari_data_inspection.utils.data_loading import load_data
-from napari_data_inspection.widgets.layers_block_widget import setup_layerblock
 
 if TYPE_CHECKING:
     import napari
@@ -134,7 +122,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
             self.index = get_value(self.progressbar)
             self.progressbar.index_changed.connect(self.on_index_changed)
 
-    # Data Laoding
+    # Data Loading
     def refresh(self):
 
         if self.running_threads != []:
@@ -205,11 +193,11 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         #     print(k, list(v.keys()))
 
     def push_data_to_cache(self, layer_block, index):
-        if layer_block.name not in self.cache_data.keys():
+        if layer_block.name not in self.cache_data:
             self.cache_data[layer_block.name] = {}
             self.cache_meta[layer_block.name] = {}
 
-        if str(index) not in self.cache_data[layer_block.name].keys():
+        if str(index) not in self.cache_data[layer_block.name]:
             file = layer_block[index]
             file_name = str(Path(file).name).replace(layer_block.dtype, "")
             layer_name = f"{layer_block.name} - {index} - {file_name}"
@@ -229,11 +217,11 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         t_name = f"{layer_block.name} - {index}"
         self.running_threads.append(t_name)
 
-        if layer_block.name not in self.cache_data.keys():
+        if layer_block.name not in self.cache_data:
             self.cache_data[layer_block.name] = {}
             self.cache_meta[layer_block.name] = {}
 
-        if str(index) not in self.cache_data[layer_block.name].keys():
+        if str(index) not in self.cache_data[layer_block.name]:
             file = layer_block[index]
             data, affine = load_data(file, layer_block.dtype)
             self.cache_data[layer_block.name][str(index)] = data
