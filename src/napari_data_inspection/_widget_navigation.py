@@ -126,7 +126,8 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
     def refresh(self):
 
         if self.running_threads != []:
-            print("Caching is running...", self.running_threads)
+            print("Caching is running for file and index:", self.running_threads)
+            print("Retry when finished...")
             self.progressbar.index_changed.disconnect(self.on_index_changed)
             set_value(self.progressbar, self.index)
             self.progressbar.index_changed.connect(self.on_index_changed)
