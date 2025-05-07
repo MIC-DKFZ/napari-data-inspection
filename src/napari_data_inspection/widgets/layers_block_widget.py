@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, List, Optional
+from typing import Any, Optional
 
 from napari._qt.qt_resources import QColoredSVGIcon
 from napari_toolkit.containers import setup_vgroupbox
@@ -7,16 +8,14 @@ from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.utils import get_value, set_value
 from napari_toolkit.utils.theme import get_theme_colors
 from napari_toolkit.utils.utils import connect_widget
-from napari_toolkit.widgets import (setup_combobox, setup_iconbutton,
-                                    setup_lineedit)
+from napari_toolkit.widgets import setup_combobox, setup_iconbutton, setup_lineedit
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import (QLayout, QSizePolicy, QVBoxLayout,
-                            QWidget)
+from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
 
 
-def collect_files(folder_path,file_type):
+def collect_files(folder_path, file_type):
 
-    if file_type =="" or folder_path=="":
+    if file_type == "" or folder_path == "":
         return []
 
     if "*" not in file_type:
@@ -24,39 +23,37 @@ def collect_files(folder_path,file_type):
     files = sorted(Path(folder_path).glob(file_type))
     return files
 
+
 class LayerBlock(QWidget):
     deleted = Signal(QWidget)
     updated = Signal(QWidget)
+    loaded = Signal(QWidget)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.files=[]
-        self.status=None
+        self.files = []
+        self.status = None
 
         main_layout = QVBoxLayout()
         container, layout = setup_vgroupbox(main_layout)
 
-
-
-        self.name_ledt = setup_lineedit(
-            None, placeholder="Name", function=self.on_change
-        )
-        self.dtype_ledt = setup_lineedit(
-            None, placeholder="Dtype", function=self.on_change
-        )
+        self.name_ledt = setup_lineedit(None, placeholder="Name", function=self.on_change)
+        self.dtype_ledt = setup_lineedit(None, placeholder="Dtype", function=self.on_change)
         self.refresh_btn = setup_iconbutton(
-            None, "", "right_arrow",theme=get_theme_colors().id, function=self.refresh
+            None, "", "right_arrow", theme=get_theme_colors().id, function=self.refresh
         )
         self.refresh_btn.setFixedWidth(30)
         self.dtype_ledt.setFixedWidth(60)
 
         self.path_ledt = setup_lineedit(
-            None, placeholder="Path", function=self.on_change,
+            None,
+            placeholder="Path",
+            function=self.on_change,
         )
-        self.ltype_cbx = setup_combobox(
-            None, options=["Image", "Labels"], function=self.on_change
+        self.ltype_cbx = setup_combobox(None, options=["Image", "Labels"], function=self.on_change)
+        self.delete_btn = setup_iconbutton(
+            None, "", "delete", theme=get_theme_colors().id, function=self.remove_self
         )
-        self.delete_btn = setup_iconbutton(None, "", "delete",theme=get_theme_colors().id, function=self.remove_self)
         self.delete_btn.setFixedWidth(30)
 
         _ = hstack(layout, [self.name_ledt, self.ltype_cbx, self.refresh_btn], stretch=[1, 1, 1])
@@ -97,26 +94,26 @@ class LayerBlock(QWidget):
         set_value(self.dtype_ledt, config["dtype"])
         set_value(self.ltype_cbx, config["ltype"])
 
-        #self.refresh()
+        # self.refresh()
 
     def on_change(self):
-        self.files=[]
+        self.files = []
 
         _icon = QColoredSVGIcon.from_resources("right_arrow")
 
         _icon = _icon.colored(theme=get_theme_colors().id)
         self.refresh_btn.setIcon(_icon)
-
+        self.updated.emit(self)
 
     def refresh(self):
-        self.files=collect_files(self.path,self.dtype)
+        self.files = collect_files(self.path, self.dtype)
 
-        if len(self.files)!=0 and get_value(self.name_ledt)!="":
+        if len(self.files) != 0 and get_value(self.name_ledt) != "":
             _icon = QColoredSVGIcon.from_resources("check")
             _icon = _icon.colored(color="green")
             self.refresh_btn.setIcon(_icon)
 
-            self.updated.emit(self)
+            self.loaded.emit(self)
 
     def remove_self(self):
         self.deleted.emit(self)
@@ -127,7 +124,7 @@ class LayerBlock(QWidget):
         self.deleteLater()
 
     def __getitem__(self, item):
-        if item<len(self.files):
+        if item < len(self.files):
             return self.files[item]
 
     def __len__(self):

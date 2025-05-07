@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 import blosc2
 import numpy as np
@@ -8,7 +8,7 @@ from napari.utils.transforms import Affine
 from skimage import io
 
 
-def load_data(file: str, dtype: str) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+def load_data(file: str, dtype: str) -> tuple[np.ndarray, Optional[np.ndarray]]:
     """
     Opens a file and returns the data along with an optional affine transformation matrix.
 
@@ -31,10 +31,12 @@ def load_data(file: str, dtype: str) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     elif dtype == ".b2nd":
         return open_blosc2(file)
     else:
-        raise ValueError(f"Unsupported dtype '{dtype}'. Your may need to implement a loader by yourself")
+        raise ValueError(
+            f"Unsupported dtype '{dtype}'. Your may need to implement a loader by yourself"
+        )
 
 
-def open_sitk(file: str) -> Tuple[np.ndarray, np.ndarray]:
+def open_sitk(file: str) -> tuple[np.ndarray, np.ndarray]:
     """Opens a medical image file (e.g., .nii.gz, .nrrd, .mha) using SimpleITK and returns the data and affine transformation matrix."""
     image = sitk.ReadImage(file)
     array = sitk.GetArrayFromImage(image)
@@ -44,27 +46,26 @@ def open_sitk(file: str) -> Tuple[np.ndarray, np.ndarray]:
     origin = np.array(image.GetOrigin()[::-1])
     direction = np.array(image.GetDirection()[::-1]).reshape(ndims, ndims)
 
-    affine=Affine(
+    affine = Affine(
         scale=spacing,
         translate=origin,
         rotate=direction,
     )
 
-
     return array, affine
 
 
-def open_skimage(file: str) -> Tuple[np.ndarray, None]:
+def open_skimage(file: str) -> tuple[np.ndarray, None]:
     """Opens a 2D image file (e.g., .png, .jpg) using scikit-image and returns the data."""
     return io.imread(file), Affine()
 
 
-def open_tiff(file: str) -> Tuple[np.ndarray, None]:
+def open_tiff(file: str) -> tuple[np.ndarray, None]:
     """Opens a TIFF image file (e.g., .tif, .tiff) using tifffile and returns the data."""
     return tiff.imread(file), None
 
 
-def open_blosc2(file: str) -> Tuple[np.ndarray, None]:
+def open_blosc2(file: str) -> tuple[np.ndarray, None]:
     """Opens a Blosc2 compressed image file (.b2nd) and returns the data."""
     image = blosc2.open(urlpath=file, mode="r", dparams={"nthreads": 1}, mmap_mode="r")
     return image[...], None
