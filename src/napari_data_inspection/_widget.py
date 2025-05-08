@@ -10,23 +10,6 @@ from napari_data_inspection.utils.data_loading import load_data
 if TYPE_CHECKING:
     import napari
 
-
-def collect_files(config):
-    folder_path = Path(config["path"])
-    file_type = config["dtype"]
-    if file_type == "" or folder_path == "":
-        return []
-
-    if "*" not in file_type:
-        file_type = "*" + file_type
-    files = sorted(folder_path.glob(file_type))
-    return files
-
-
-# class DataInspectionWidget(DataInspectionWidget_IO):
-#     pass
-
-
 class DataInspectionWidget(DataInspectionWidget_IO):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__(viewer)
