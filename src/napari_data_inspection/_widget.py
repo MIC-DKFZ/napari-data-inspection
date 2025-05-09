@@ -37,6 +37,7 @@ class DataInspectionWidget(DataInspectionWidget_IO):
                 "interpolation3d": layer.interpolation3d,
                 "depiction": layer.depiction,
                 "rendering": layer.rendering,
+                "visible": layer.visible,
             }
 
         elif isinstance(layer, Labels):
@@ -52,6 +53,7 @@ class DataInspectionWidget(DataInspectionWidget_IO):
                 "contiguous": layer.contiguous,
                 "preserve_labels": layer.preserve_labels,
                 "show_selected_label": layer.show_selected_label,
+                "visible": layer.visible,
             }
         else:
             props = {}
