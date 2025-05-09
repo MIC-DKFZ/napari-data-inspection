@@ -10,6 +10,7 @@ from napari_data_inspection.utils.data_loading import load_data
 if TYPE_CHECKING:
     import napari
 
+
 class DataInspectionWidget(DataInspectionWidget_IO):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__(viewer)

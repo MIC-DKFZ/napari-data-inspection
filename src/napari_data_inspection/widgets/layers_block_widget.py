@@ -1,3 +1,4 @@
+import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Optional
@@ -13,15 +14,31 @@ from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
 
 
-def collect_files(folder_path, file_type):
+def collect_files(folder_path, file_type, pattern=None):
 
     if file_type == "" or folder_path == "":
         return []
 
-    if "*" not in file_type:
-        file_type = "*" + file_type
-    files = sorted(Path(folder_path).glob(file_type))
-    return files
+    if pattern is None:
+        pattern = "*"
+    elif "*" not in pattern:
+        pattern = "*" + pattern
+
+    files = list(Path(folder_path).glob(pattern + file_type))
+    if files == []:
+        return []
+    files_pattern = [str(file.relative_to(folder_path))[: -len(file_type)] for file in files]
+
+    regex_pattern = re.escape(pattern).replace(r"\*", r"(.+?)") + r"$"
+    files_pattern = [re.match(regex_pattern, file) for file in files_pattern]
+    files_pattern = [match.group(1) for match in files_pattern if match is not None]
+
+    assert len(files) == len(files_pattern)  # Check your dtype and pattern
+
+    combined = sorted(zip(files_pattern, files, strict=False))
+    _, files = zip(*combined, strict=False)
+
+    return list(files)
 
 
 class LayerBlock(QWidget):
@@ -36,18 +53,25 @@ class LayerBlock(QWidget):
 
         main_layout = QVBoxLayout()
         container, layout = setup_vgroupbox(main_layout)
-
-        self.name_ledt = setup_lineedit(None, placeholder="Name", function=self.on_change)
-        self.dtype_ledt = setup_lineedit(None, placeholder="Dtype", function=self.on_change)
+        self.path_ledt = setup_lineedit(
+            layout,
+            placeholder="Path",
+            function=self.on_change,
+        )
+        self.name_ledt = setup_lineedit(None, placeholder="Layer Name", function=self.on_change)
+        # self.dtype_ledt = setup_lineedit(None, placeholder="Dtype", function=self.on_change)
+        dtype_options = [".nii.gz", ".png", ".b2nd", ".nrrd", ".mha", ".tif", ".tiff"]
+        self.dtype_cbx = setup_combobox(None, options=dtype_options, function=self.on_change)
         self.refresh_btn = setup_iconbutton(
             None, "", "right_arrow", theme=get_theme_colors().id, function=self.refresh
         )
         self.refresh_btn.setFixedWidth(30)
-        self.dtype_ledt.setFixedWidth(60)
 
-        self.path_ledt = setup_lineedit(
+        self.dtype_cbx.setFixedWidth(90)
+
+        self.pattern_ledt = setup_lineedit(
             None,
-            placeholder="Path",
+            placeholder="File Pattern",
             function=self.on_change,
         )
         self.ltype_cbx = setup_combobox(None, options=["Image", "Labels"], function=self.on_change)
@@ -55,9 +79,13 @@ class LayerBlock(QWidget):
             None, "", "delete", theme=get_theme_colors().id, function=self.remove_self
         )
         self.delete_btn.setFixedWidth(30)
-
-        _ = hstack(layout, [self.name_ledt, self.ltype_cbx, self.refresh_btn], stretch=[1, 1, 1])
-        _ = hstack(layout, [self.path_ledt, self.dtype_ledt, self.delete_btn], stretch=[1, 1, 1])
+        self.ltype_cbx.setFixedWidth(90)
+        _ = hstack(
+            layout, [self.name_ledt, self.ltype_cbx, self.refresh_btn]
+        )  # , stretch=[1, 1, 1])
+        _ = hstack(
+            layout, [self.pattern_ledt, self.dtype_cbx, self.delete_btn]
+        )  # , stretch=[1, 1, 1])
 
         self.setLayout(main_layout)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -74,7 +102,7 @@ class LayerBlock(QWidget):
 
     @property
     def dtype(self):
-        return get_value(self.dtype_ledt)
+        return get_value(self.dtype_cbx)[0]
 
     @property
     def ltype(self):
@@ -84,14 +112,16 @@ class LayerBlock(QWidget):
         return {
             "name": get_value(self.name_ledt),
             "path": get_value(self.path_ledt),
-            "dtype": get_value(self.dtype_ledt),
+            "dtype": get_value(self.dtype_cbx)[0],
+            "pattern": get_value(self.pattern_ledt),
             "ltype": get_value(self.ltype_cbx)[0],
         }
 
     def set_config(self, config):
         set_value(self.name_ledt, config["name"])
         set_value(self.path_ledt, config["path"])
-        set_value(self.dtype_ledt, config["dtype"])
+        set_value(self.dtype_cbx, config["dtype"])
+        set_value(self.pattern_ledt, config.get("pattern", ""))
         set_value(self.ltype_cbx, config["ltype"])
 
         # self.refresh()
@@ -106,7 +136,7 @@ class LayerBlock(QWidget):
         self.updated.emit(self)
 
     def refresh(self):
-        self.files = collect_files(self.path, self.dtype)
+        self.files = collect_files(self.path, self.dtype, get_value(self.pattern_ledt))
 
         if len(self.files) != 0 and get_value(self.name_ledt) != "":
             _icon = QColoredSVGIcon.from_resources("check")
@@ -169,3 +199,24 @@ def setup_layerblock(
         tooltips=tooltips,
         stretch=stretch,
     )
+
+
+if __name__ == "__main__":
+    path_imgs = "/home/l727r/Documents/E132-Rohdaten/nnUNetv2/Dataset181_Kaggle2025_BYU_FlagMot_BartleysData/imagesTr"
+    dtype_imgs = ".nii.gz"
+    patterns_imgs = "*_0000"
+
+    path_gt = "/home/l727r/Documents/E132-Rohdaten/nnUNetv2/Dataset181_Kaggle2025_BYU_FlagMot_BartleysData/labelsTr"
+    dtype_gt = ".nii.gz"
+    patterns_gt = None
+
+    path_pred = "/home/l727r/Documents/cluster-checkpoints-all/isensee/nnUNet_results_kaggle2025_byu/Dataset185_Kaggle2025_BYU_FlagellarMotors_mergedExternalBartley_384/MotorRegressionTrainer_BCEtopK20Loss_moreDA__nnUNetResEncUNetMPlans__3d_fullres_filt16/cv_results_nifti"
+    dtype_pred = ".nii.gz"
+    patterns_pred = "10*__instseg"
+
+    files_imgs = collect_files(path_imgs, dtype_imgs, patterns_imgs)
+    files_gt = collect_files(path_gt, dtype_gt, patterns_gt)
+    files_pred = collect_files(path_pred, dtype_pred, patterns_pred)
+    # print(files_imgs, files_gt, files_pred)
+    for a, b, c in zip(files_imgs, files_gt, files_pred, strict=False):
+        print(a.name, b.name, c.name)
