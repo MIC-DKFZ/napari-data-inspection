@@ -12,7 +12,7 @@ from napari_toolkit.utils.utils import connect_widget
 from napari_toolkit.widgets import setup_combobox, setup_iconbutton, setup_lineedit
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
-
+from natsort import natsorted
 
 def collect_files(folder_path, file_type, pattern=None):
 
@@ -25,18 +25,19 @@ def collect_files(folder_path, file_type, pattern=None):
         pattern = "*" + pattern
 
     files = list(Path(folder_path).glob(pattern + file_type))
-    if files == []:
-        return []
-    files_pattern = [str(file.relative_to(folder_path))[: -len(file_type)] for file in files]
-
-    regex_pattern = re.escape(pattern).replace(r"\*", r"(.+?)") + r"$"
-    files_pattern = [re.match(regex_pattern, file) for file in files_pattern]
-    files_pattern = [match.group(1) for match in files_pattern if match is not None]
-
-    assert len(files) == len(files_pattern)  # Check your dtype and pattern
-
-    combined = sorted(zip(files_pattern, files, strict=False))
-    _, files = zip(*combined, strict=False)
+    files = natsorted(files, key=lambda p: p.name)
+    # if files == []:
+    #     return []
+    # files_pattern = [str(file.relative_to(folder_path))[: -len(file_type)] for file in files]
+    #
+    # regex_pattern = re.escape(pattern).replace(r"\*", r"(.+?)") + r"$"
+    # files_pattern = [re.match(regex_pattern, file) for file in files_pattern]
+    # files_pattern = [match.group(1) for match in files_pattern if match is not None]
+    #
+    # assert len(files) == len(files_pattern)  # Check your dtype and pattern
+    #
+    # combined = sorted(zip(files_pattern, files, strict=False))
+    # _, files = zip(*combined, strict=False)
 
     return list(files)
 
@@ -163,10 +164,6 @@ class LayerBlock(QWidget):
 
 def setup_layerblock(
     layout: QLayout,
-    function: Optional[Callable[[str], None]] = None,
-    default: int = None,
-    fixed_color: Optional[Any] = None,
-    shortcut: Optional[str] = None,
     tooltips: Optional[str] = None,
     stretch: int = 1,
 ):
@@ -178,11 +175,6 @@ def setup_layerblock(
 
     Args:
         layout (QLayout): The layout to which the QHSwitch will be added.
-        options (List[str]): A list of string options for the switch widget.
-        function (Optional[Callable[[str], None]], optional): A callback function that takes the selected option as an argument. Defaults to None.
-        default (Optional[int], optional): The index of the default selected option. Defaults to None.
-        If given this oneis used, else the theme color
-        shortcut (Optional[str], optional): A keyboard shortcut to toggle the switch. Defaults to None.
         tooltips (Optional[str], optional): Tooltip text for the widget. Defaults to None.
         stretch (int, optional): The stretch factor for the spinbox in the layout. Defaults to 1.
 
