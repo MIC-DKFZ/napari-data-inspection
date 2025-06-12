@@ -31,7 +31,8 @@ dependencies = [
     "blosc2",
     "SimpleITK",
     "tifffile",
-    "scikit-image"
+    "scikit-image",
+    "natsort",
 ]
 
 [project.optional-dependencies]

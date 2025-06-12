@@ -8,6 +8,7 @@ from napari_toolkit.widgets import (
     setup_lineedit,
     setup_progressbaredit,
     setup_pushbutton,
+    setup_spinbox, setup_label,
 )
 from qtpy.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
 
@@ -52,13 +53,16 @@ class DataInspectionWidget_GUI(QWidget):
             _layout, placeholder="Enter Filename ...", function=self.on_name_entered
         )
 
-        self.keep_camera = setup_checkbox(None, "Keep Camera", False)
-        self.keep_color = setup_checkbox(None, "Keep ColorMap", True)
-        _ = hstack(_layout, [self.keep_camera, self.keep_color])
         self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
+        self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
-        self.prefetch_prev = setup_checkbox(_layout, "Prefetch Previous", True)
-        self.prefetch_next = setup_checkbox(_layout, "Prefetch Next", True)
+        _container, _layout = setup_vgroupbox(main_layout, "Prefetching")
+        self.prefetch_prev = setup_checkbox(None, "Previous", True,function=self.on_prefetch_prev_changed)
+        self.prefetch_next = setup_checkbox(None, "Next", True,function=self.on_prefetch_next_changed)
+        hstack(_layout, [self.prefetch_prev, self.prefetch_next])
+        label=setup_label(None,"Prefetch Radius")
+        self.radius=setup_spinbox(None,1,function=self.on_radius_changed)
+        hstack(_layout, [label,self.radius])
 
         # Add Layer
         new_btn = setup_iconbutton(None, "New Layer", "add", function=self.on_new_layer)
@@ -125,4 +129,13 @@ class DataInspectionWidget_GUI(QWidget):
         pass
 
     def save_project(self):
+        pass
+
+    def on_prefetch_prev_changed(self,state):
+       pass
+
+    def on_prefetch_next_changed(self,state):
+        pass
+
+    def on_radius_changed(self,value):
         pass

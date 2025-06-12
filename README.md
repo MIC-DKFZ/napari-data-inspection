@@ -1,5 +1,21 @@
 # napari-data-inspection
 
+
+
+Load_i
+-push_to_cache
+-load()
+-prefetch_next
+-prefetch_previous
+
+
+
+
+
+TODO
+- load when prefetching is activated
+- delete when prefetching is deactivated
+
 Data Inspection Plugin, designed to streamline file navigation and enhance the efficiency of data inspection.
 
 ## Installation

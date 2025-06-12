@@ -38,7 +38,6 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
             config = {
                 "project_name": get_value(self.project_name),
                 "keep_camera": get_value(self.keep_camera),
-                "keep_color": get_value(self.keep_color),
                 "keep_properties": get_value(self.keep_properties),
                 "prefetch_prev": get_value(self.prefetch_prev),
                 "prefetch_next": get_value(self.prefetch_next),
@@ -67,7 +66,6 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
 
             set_value(self.project_name, global_config["project_name"])
             set_value(self.keep_camera, global_config.get("keep_camera", False))
-            set_value(self.keep_color, global_config.get("keep_color", True))
             set_value(self.keep_properties, global_config.get("keep_properties", True))
             set_value(self.prefetch_prev, global_config.get("prefetch_prev", True))
             set_value(self.prefetch_next, global_config.get("prefetch_next", True))
