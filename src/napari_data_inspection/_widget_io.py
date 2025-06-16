@@ -41,6 +41,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
                 "keep_properties": get_value(self.keep_properties),
                 "prefetch_prev": get_value(self.prefetch_prev),
                 "prefetch_next": get_value(self.prefetch_next),
+                "prefetch_radius": get_value(self.radius),
                 "layers": layer_configs,
             }
 
@@ -69,6 +70,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
             set_value(self.keep_properties, global_config.get("keep_properties", True))
             set_value(self.prefetch_prev, global_config.get("prefetch_prev", True))
             set_value(self.prefetch_next, global_config.get("prefetch_next", True))
+            set_value(self.radius, global_config.get("prefetch_radius", 1))
 
             for config in global_config["layers"]:
                 self.add_layer(config)

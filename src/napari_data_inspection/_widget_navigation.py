@@ -1,4 +1,5 @@
 import concurrent.futures
+from concurrent.futures import CancelledError
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -9,7 +10,6 @@ from qtpy.QtWidgets import QShortcut
 
 from napari_data_inspection._widget_gui import DataInspectionWidget_GUI
 from napari_data_inspection.utils.data_loading import load_data
-from concurrent.futures import CancelledError
 
 if TYPE_CHECKING:
     import napari
@@ -43,7 +43,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         _name = get_value(self.search_name)
         for layer_block in self.layer_blocks:
             files = [str(_file).replace(layer_block.path, "") for _file in layer_block.files]
-            idx = next((i for i,f in enumerate(files) if _name in f), None)
+            idx = next((i for i, f in enumerate(files) if _name in f), None)
             if idx is not None:
                 set_value(self.progressbar, idx)
                 set_value(self.search_name, "")
@@ -88,7 +88,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
             self.progressbar.index_changed.connect(self.on_index_changed)
             return
 
-        min_len = np.min([l for l in layer_lengths if l > 0])
+        min_len = np.min([_l for _l in layer_lengths if _l > 0])
         if min_len != self.progressbar.max_value:
             self.progressbar.index_changed.disconnect(self.on_index_changed)
             self.progressbar.setMaximum(min_len - 1)
@@ -116,11 +116,13 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         self.index = idx
 
     def refresh_layer(self, layer_block, index):
-        print("Refresh",index,self.index)
         # if we came straight from adjacent index, push that into cache
-        if index + 1 == self.index and get_value(self.prefetch_next):
-            self.push_data_to_cache(layer_block, self.index)
-        elif index - 1 == self.index and get_value(self.prefetch_prev):
+        if (
+            index + 1 == self.index
+            and get_value(self.prefetch_next)
+            or index - 1 == self.index
+            and get_value(self.prefetch_prev)
+        ):
             self.push_data_to_cache(layer_block, self.index)
 
         if len(layer_block):
@@ -131,7 +133,6 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         # … your existing loading logic …
 
     def push_data_to_cache(self, layer_block, index):
-        print(f"Push Layer {layer_block.name} at Index {index}")
         name = layer_block.name
         idx = str(index)
         if name not in self.cache_data:
@@ -173,7 +174,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
                 self.cache_meta[layer][key] = affine
             except CancelledError:
                 pass
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(f"Prefetch callback error for {layer}[{key}]: {e}")
             finally:
                 self._cache_futures[layer].pop(key, None)
@@ -182,23 +183,17 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
     def _prune_caches_and_futures(self, current_idx):
 
-        keep_indices={current_idx}
+        keep_indices = {str(current_idx)}
         if get_value(self.prefetch_prev):
-            keep_indices.update(
-                str(i) for i in range(current_idx - self.cache_radius, current_idx)
-            )
+            keep_indices.update(str(i) for i in range(current_idx - self.cache_radius, current_idx))
 
         if get_value(self.prefetch_next):
             keep_indices.update(
                 str(i) for i in range(current_idx + 1, current_idx + self.cache_radius + 1)
             )
 
-        # keep_indices = {
-        #     str(i)
-        #     for i in range(current_idx - self.cache_radius, current_idx + self.cache_radius + 1)
-        # }
         valid_layers = {b.name for b in self.layer_blocks}
-        print("Kee Indices:", keep_indices)
+
         # prune cache_data & cache_meta
         def prune_dict(d):
             return {
@@ -209,7 +204,6 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
         self.cache_data = prune_dict(self.cache_data)
         self.cache_meta = prune_dict(self.cache_meta)
-        print(self.cache_meta)
         # cancel & prune futures
         for layer, fmap in list(self._cache_futures.items()):
             if layer not in valid_layers:
@@ -229,7 +223,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         self._executor.shutdown(wait=False)
         super().closeEvent(event)
 
-    def on_prefetch_prev_changed(self,state):
+    def on_prefetch_prev_changed(self, state):
         idx = get_value(self.progressbar)
         if state:
             for lb in self.layer_blocks:
@@ -238,7 +232,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         else:
             self._prune_caches_and_futures(idx)
 
-    def on_prefetch_next_changed(self,state):
+    def on_prefetch_next_changed(self, state):
         idx = get_value(self.progressbar)
         if state:
             for lb in self.layer_blocks:
@@ -247,16 +241,17 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         else:
             self._prune_caches_and_futures(idx)
 
-    def on_radius_changed(self,value):
-        self.cache_radius=value
-        idx = get_value(self.progressbar)
-        self._prune_caches_and_futures(idx)
-
-        if get_value(self.prefetch_next):
-            for lb in self.layer_blocks:
-                for offset in range(1, self.cache_radius + 1):
-                    self.fill_cache(lb, idx + offset)
-        if get_value(self.prefetch_prev):
-            for lb in self.layer_blocks:
-                for offset in range(1, self.cache_radius + 1):
-                    self.fill_cache(lb, idx - offset)
+    def on_radius_changed(self, value):
+        pass
+        # self.cache_radius=value
+        # idx = get_value(self.progressbar)
+        # self._prune_caches_and_futures(idx)
+        #
+        # if get_value(self.prefetch_next):
+        #     for lb in self.layer_blocks:
+        #         for offset in range(1, self.cache_radius + 1):
+        #             self.fill_cache(lb, idx + offset)
+        # if get_value(self.prefetch_prev):
+        #     for lb in self.layer_blocks:
+        #         for offset in range(1, self.cache_radius + 1):
+        #             self.fill_cache(lb, idx - offset)

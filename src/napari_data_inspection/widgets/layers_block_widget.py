@@ -1,7 +1,5 @@
-import re
-from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from napari._qt.qt_resources import QColoredSVGIcon
 from napari_toolkit.containers import setup_vgroupbox
@@ -10,9 +8,10 @@ from napari_toolkit.utils import get_value, set_value
 from napari_toolkit.utils.theme import get_theme_colors
 from napari_toolkit.utils.utils import connect_widget
 from napari_toolkit.widgets import setup_combobox, setup_iconbutton, setup_lineedit
+from natsort import natsorted
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
-from natsort import natsorted
+
 
 def collect_files(folder_path, file_type, pattern=None):
 

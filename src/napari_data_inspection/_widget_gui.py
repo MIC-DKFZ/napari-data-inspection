@@ -3,12 +3,14 @@ from typing import TYPE_CHECKING
 from napari_toolkit.containers import setup_scrollarea, setup_vgroupbox
 from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.widgets import (
+    setup_acknowledgements,
     setup_checkbox,
     setup_iconbutton,
+    setup_label,
     setup_lineedit,
     setup_progressbaredit,
     setup_pushbutton,
-    setup_spinbox, setup_label,
+    setup_spinbox,
 )
 from qtpy.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
 
@@ -57,12 +59,16 @@ class DataInspectionWidget_GUI(QWidget):
         self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
         _container, _layout = setup_vgroupbox(main_layout, "Prefetching")
-        self.prefetch_prev = setup_checkbox(None, "Previous", True,function=self.on_prefetch_prev_changed)
-        self.prefetch_next = setup_checkbox(None, "Next", True,function=self.on_prefetch_next_changed)
+        self.prefetch_prev = setup_checkbox(
+            None, "Previous", True, function=self.on_prefetch_prev_changed
+        )
+        self.prefetch_next = setup_checkbox(
+            None, "Next", True, function=self.on_prefetch_next_changed
+        )
         hstack(_layout, [self.prefetch_prev, self.prefetch_next])
-        label=setup_label(None,"Prefetch Radius")
-        self.radius=setup_spinbox(None,1,function=self.on_radius_changed)
-        hstack(_layout, [label,self.radius])
+        label = setup_label(None, "Prefetch Radius")
+        self.radius = setup_spinbox(None, 1, function=self.on_radius_changed)
+        hstack(_layout, [label, self.radius])
 
         # Add Layer
         new_btn = setup_iconbutton(None, "New Layer", "add", function=self.on_new_layer)
@@ -79,6 +85,8 @@ class DataInspectionWidget_GUI(QWidget):
         self.layer_container.setContentsMargins(5, 5, 5, 5)
 
         self.scroll_area.setWidget(self.layer_container)
+
+        setup_acknowledgements(main_layout)
 
         self.setLayout(main_layout)
 
@@ -131,11 +139,11 @@ class DataInspectionWidget_GUI(QWidget):
     def save_project(self):
         pass
 
-    def on_prefetch_prev_changed(self,state):
-       pass
-
-    def on_prefetch_next_changed(self,state):
+    def on_prefetch_prev_changed(self, state):
         pass
 
-    def on_radius_changed(self,value):
+    def on_prefetch_next_changed(self, state):
+        pass
+
+    def on_radius_changed(self, value):
         pass

@@ -73,7 +73,6 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             self.viewer.camera.perspective = camera["camera_perspective"]
 
     def load_data(self, layer_block, index):
-        cmap = None
         props = {}
         camera = None
 
@@ -113,4 +112,3 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             self.set_camera(self.viewer, camera)
         else:
             self.viewer.reset_view()
-

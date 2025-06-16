@@ -68,9 +68,9 @@ where = ["src"]
 "*" = ["*.yaml"]
 
 
-[tool.setuptools_scm]
-write_to = "src/napari_data_inspection/_version.py"
-fallback_version = "0.0.1+nogit"
+
+[tool.setuptools.dynamic]
+version = {attr = "napari_data_inspection.__init__.__version__"}
 
 
 [tool.black]
