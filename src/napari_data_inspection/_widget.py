@@ -67,10 +67,10 @@ class DataInspectionWidget(DataInspectionWidget_IO):
 
     def set_camera(self, viewer, camera):
         if camera is not None:
-            self.viewer.camera.zoom = camera["camera_zoom"]
-            self.viewer.camera.center = camera["camera_center"]
-            self.viewer.camera.angles = camera["camera_angle"]
-            self.viewer.camera.perspective = camera["camera_perspective"]
+            viewer.camera.zoom = camera["camera_zoom"]
+            viewer.camera.center = camera["camera_center"]
+            viewer.camera.angles = camera["camera_angle"]
+            viewer.camera.perspective = camera["camera_perspective"]
 
     def load_data(self, layer_block, index):
         props = {}

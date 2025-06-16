@@ -242,16 +242,36 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
             self._prune_caches_and_futures(idx)
 
     def on_radius_changed(self, value):
-        pass
-        # self.cache_radius=value
-        # idx = get_value(self.progressbar)
-        # self._prune_caches_and_futures(idx)
-        #
-        # if get_value(self.prefetch_next):
-        #     for lb in self.layer_blocks:
-        #         for offset in range(1, self.cache_radius + 1):
-        #             self.fill_cache(lb, idx + offset)
-        # if get_value(self.prefetch_prev):
-        #     for lb in self.layer_blocks:
-        #         for offset in range(1, self.cache_radius + 1):
-        #             self.fill_cache(lb, idx - offset)
+        self.cache_radius = value
+        idx = get_value(self.progressbar)
+        self._prune_caches_and_futures(idx)
+
+        if get_value(self.prefetch_next):
+            for lb in self.layer_blocks:
+                for offset in range(1, self.cache_radius + 1):
+                    self.fill_cache(lb, idx + offset)
+        if get_value(self.prefetch_prev):
+            for lb in self.layer_blocks:
+                for offset in range(1, self.cache_radius + 1):
+                    self.fill_cache(lb, idx - offset)
+
+    def clear_project(self):
+        for layer_block in self.layer_blocks:
+
+            file = layer_block[self.index]
+            file_name = str(Path(file).name).replace(layer_block.dtype, "")
+            layer_name = f"{layer_block.name} - {self.index} - {file_name}"
+            if layer_name in self.viewer.layers:
+                del self.viewer.layers[layer_name]
+
+            self.layer_layout.removeWidget(layer_block)
+            del layer_block
+
+        self.layer_blocks = []
+        self.scroll_area.setWidget(self.layer_container)
+        self.index = 0
+
+        self.update_max_len()
+        self._prune_caches_and_futures()
+
+        super().clear_project()

@@ -1,7 +1,9 @@
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from napari_toolkit.containers import setup_scrollarea, setup_vgroupbox
 from napari_toolkit.containers.boxlayout import hstack
+from napari_toolkit.utils import set_value
 from napari_toolkit.widgets import (
     setup_acknowledgements,
     setup_checkbox,
@@ -44,6 +46,9 @@ class DataInspectionWidget_GUI(QWidget):
         lbtn = setup_pushbutton(None, "Load", function=self.load_project)
         sbtn = setup_pushbutton(None, "Save", function=self.save_project)
         hstack(_layout, [lbtn, sbtn])
+        cln = setup_pushbutton(None, "Clear", function=self.clear_project)
+        lbl = setup_label(None, "")
+        hstack(_layout, [cln, lbl])
 
         # Progressbar
         _container, _layout = setup_vgroupbox(main_layout, "Navigation")
@@ -126,7 +131,15 @@ class DataInspectionWidget_GUI(QWidget):
 
     def on_layer_removed(self, block):
         index = self.layer_blocks.index(block)
+        print("DEL", index)
         if 0 <= index < len(self.layer_blocks):
+
+            file = block[self.index]
+            if file is not None:
+                file_name = str(Path(file).name).replace(block.dtype, "")
+                layer_name = f"{block.name} - {self.index} - {file_name}"
+                if layer_name in self.viewer.layers:
+                    del self.viewer.layers[layer_name]
             del self.layer_blocks[index]
 
     def on_layer_updated(self):
@@ -138,6 +151,17 @@ class DataInspectionWidget_GUI(QWidget):
 
     def save_project(self):
         pass
+
+    def clear_project(self):
+        self.index = 0
+        set_value(self.progressbar, self.index)
+        set_value(self.project_name, "")
+        set_value(self.search_name, "")
+        set_value(self.keep_properties, True)
+        set_value(self.keep_camera, False)
+        set_value(self.prefetch_prev, True)
+        set_value(self.prefetch_next, True)
+        set_value(self.radius, 1)
 
     def on_prefetch_prev_changed(self, state):
         pass

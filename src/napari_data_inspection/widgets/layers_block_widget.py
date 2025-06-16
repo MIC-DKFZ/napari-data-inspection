@@ -12,6 +12,8 @@ from natsort import natsorted
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
 
+from napari_data_inspection.utils.data_loading import LOADER_REGISTRY
+
 
 def collect_files(folder_path, file_type, pattern=None):
 
@@ -59,8 +61,7 @@ class LayerBlock(QWidget):
             function=self.on_change,
         )
         self.name_ledt = setup_lineedit(None, placeholder="Layer Name", function=self.on_change)
-        # self.dtype_ledt = setup_lineedit(None, placeholder="Dtype", function=self.on_change)
-        dtype_options = [".nii.gz", ".png", ".b2nd", ".nrrd", ".mha", ".tif", ".tiff"]
+        dtype_options = list(LOADER_REGISTRY.keys())
         self.dtype_cbx = setup_combobox(None, options=dtype_options, function=self.on_change)
         self.refresh_btn = setup_iconbutton(
             None, "", "right_arrow", theme=get_theme_colors().id, function=self.refresh

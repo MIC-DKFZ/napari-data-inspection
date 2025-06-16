@@ -8,15 +8,6 @@ from napari_data_inspection._widget_navigation import DataInspectionWidget_LC
 
 
 class DataInspectionWidget_IO(DataInspectionWidget_LC):
-    def clear(self):
-
-        for layer_block in self.layer_blocks:
-            self.layer_layout.removeWidget(layer_block)
-            del layer_block
-        self.layer_blocks = []
-
-        self.scroll_area.setWidget(self.layer_container)
-
     def save_project(self):
         if get_value(self.project_name) == "":
             print("Project name not set")
@@ -60,7 +51,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
             options=QFileDialog.DontUseNativeDialog,
         )
         if config_path is not None and config_path.endswith(self.file_ending):
-            self.clear()
+            self.clear_project()
 
             with Path(config_path).open("r") as f:
                 global_config = json.load(f)
