@@ -48,14 +48,8 @@ testing = [
 [project.entry-points."napari.manifest"]
 napari-data-inspection = "napari_data_inspection:napari.yaml"
 
-[project.urls]
-"Bug Tracker" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection/issues"
-"Documentation" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection#README.md"
-"Source Code" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection"
-"User Support" = "https://codebase.helmholtz.cloud/hi-dkfz/applied-computer-vision-lab/tools/napari_plugins/napari-data-inspection/issues"
-
 [build-system]
-requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]
+requires = ["setuptools>=42.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -67,11 +61,12 @@ where = ["src"]
 [tool.setuptools.package-data]
 "*" = ["*.yaml"]
 
-
+[project.urls]
+Homepage = "https://github.com/MIC-DKFZ/napari-data-inspection"
+Code = "https://github.com/MIC-DKFZ/napari-data-inspection"
 
 [tool.setuptools.dynamic]
 version = {attr = "napari_data_inspection.__init__.__version__"}
-
 
 [tool.black]
 line-length = 100
