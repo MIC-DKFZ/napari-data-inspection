@@ -272,6 +272,6 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         self.index = 0
 
         self.update_max_len()
-        self._prune_caches_and_futures()
+        self._prune_caches_and_futures(self.index)
 
         super().clear_project()
