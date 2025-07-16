@@ -131,12 +131,13 @@ class DataInspectionWidget_GUI(QWidget):
 
     def on_layer_removed(self, block):
         index = self.layer_blocks.index(block)
-        print("DEL", index)
         if 0 <= index < len(self.layer_blocks):
 
             file = block[self.index]
             if file is not None:
-                file_name = str(Path(file).name).replace(block.dtype, "")
+                #file_name = str(Path(file).name).replace(block.dtype, "")
+                file_name = str(Path(file).relative_to(block.path)).replace(block.dtype,
+                                                                                  "")
                 layer_name = f"{block.name} - {self.index} - {file_name}"
                 if layer_name in self.viewer.layers:
                     del self.viewer.layers[layer_name]

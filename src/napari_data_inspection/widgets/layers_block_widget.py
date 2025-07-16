@@ -26,19 +26,7 @@ def collect_files(folder_path, file_type, pattern=None):
         pattern = "*" + pattern
 
     files = list(Path(folder_path).glob(pattern + file_type))
-    files = natsorted(files, key=lambda p: p.name)
-    # if files == []:
-    #     return []
-    # files_pattern = [str(file.relative_to(folder_path))[: -len(file_type)] for file in files]
-    #
-    # regex_pattern = re.escape(pattern).replace(r"\*", r"(.+?)") + r"$"
-    # files_pattern = [re.match(regex_pattern, file) for file in files_pattern]
-    # files_pattern = [match.group(1) for match in files_pattern if match is not None]
-    #
-    # assert len(files) == len(files_pattern)  # Check your dtype and pattern
-    #
-    # combined = sorted(zip(files_pattern, files, strict=False))
-    # _, files = zip(*combined, strict=False)
+    files = natsorted(files, key=lambda p: str(p))
 
     return list(files)
 
