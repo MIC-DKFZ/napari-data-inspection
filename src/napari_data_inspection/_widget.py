@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from napari.layers import Image, Labels
 from napari_toolkit.utils import get_value
+import numpy as np
 
 from napari_data_inspection._widget_io import DataInspectionWidget_IO
 from napari_data_inspection.utils.data_loading import load_data
@@ -103,6 +104,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         if layer_block.ltype == "Image":
             layer = Image(data=data, affine=affine, name=layer_name)
         elif layer_block.ltype == "Labels":
+            if not np.issubdtype(data.dtype, np.integer):
+                data=data.astype(int)
             layer = Labels(data=data, affine=affine, name=layer_name)
         else:
             return
