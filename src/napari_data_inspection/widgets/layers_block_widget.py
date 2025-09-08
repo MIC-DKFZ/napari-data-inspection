@@ -1,35 +1,36 @@
 from pathlib import Path
-from typing import Optional
+from typing import Union
 
+from vidata import LOADER_REGISTRY
+from vidata.file_manager import FileManager
 from napari._qt.qt_resources import QColoredSVGIcon
 from napari_toolkit.containers import setup_vgroupbox
 from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.utils import get_value, set_value
 from napari_toolkit.utils.theme import get_theme_colors
 from napari_toolkit.utils.utils import connect_widget
-from napari_toolkit.widgets import setup_combobox, setup_iconbutton, setup_lineedit
-from natsort import natsorted
+from napari_toolkit.widgets import (
+    setup_combobox,
+    setup_iconbutton,
+    setup_lineedit,
+    setup_toolbutton,
+)
+from napari_toolkit.widgets.buttons.tool_button import (  # make get_value,set_value
+    activate_option,
+    get_option,
+    set_options,
+)
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
+from qtpy.QtWidgets import (
+    QLayout,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
-from napari_data_inspection.utils.data_loading import LOADER_REGISTRY
+PathLike = Union[str, Path]
 
-
-def collect_files(folder_path, file_type, pattern=None):
-
-    if file_type == "" or folder_path == "":
-        return []
-
-    if pattern is None:
-        pattern = "*"
-    elif "*" not in pattern:
-        pattern = "*" + pattern
-
-    files = list(Path(folder_path).glob(pattern + file_type))
-    files = natsorted(files, key=lambda p: str(p))
-
-    return list(files)
-
+REGISTRY_MAPPING={"Image":"image","Labels":"mask"}
 
 class LayerBlock(QWidget):
     deleted = Signal(QWidget)
@@ -38,43 +39,62 @@ class LayerBlock(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.files = []
-        self.status = None
+        self.fm = FileManager("","")
+        self.include_names=None
 
         main_layout = QVBoxLayout()
         container, layout = setup_vgroupbox(main_layout)
+        # Path
         self.path_ledt = setup_lineedit(
-            layout,
+            None,
             placeholder="Path",
             function=self.on_change,
         )
+        # // Next Line
+        # Layer Name
         self.name_ledt = setup_lineedit(None, placeholder="Layer Name", function=self.on_change)
-        dtype_options = list(LOADER_REGISTRY.keys())
-        self.dtype_cbx = setup_combobox(None, options=dtype_options, function=self.on_change)
+        # Layer Type
+        self.ltype_cbx = setup_combobox(None, options=["Image", "Labels"], function=self.on_change_ltype)
+        # Delete and Load
+        self.delete_btn = setup_iconbutton(
+            None, "", "delete", theme=get_theme_colors().id, function=self.remove_self)
         self.refresh_btn = setup_iconbutton(
             None, "", "right_arrow", theme=get_theme_colors().id, function=self.refresh
         )
-        self.refresh_btn.setFixedWidth(30)
-
-        self.dtype_cbx.setFixedWidth(90)
-
+        # // Next Line
+        # Pattern
         self.pattern_ledt = setup_lineedit(
             None,
             placeholder="File Pattern",
             function=self.on_change,
         )
-        self.ltype_cbx = setup_combobox(None, options=["Image", "Labels"], function=self.on_change)
-        self.delete_btn = setup_iconbutton(
-            None, "", "delete", theme=get_theme_colors().id, function=self.remove_self
-        )
-        self.delete_btn.setFixedWidth(30)
+        # File Type
+        file_type_options = list(LOADER_REGISTRY[REGISTRY_MAPPING[self.ltype]].keys())
+        self.file_type_cbx = setup_combobox(None, options=file_type_options, function=self.on_change_file_type)
+        # Backend
+
+        # Fix the size
         self.ltype_cbx.setFixedWidth(90)
+        self.refresh_btn.setFixedWidth(30)
+        self.delete_btn.setFixedWidth(30)
+
+        self.file_type_cbx.setFixedWidth(90)
+        self.name_ledt.setMinimumWidth(50)
+        self.pattern_ledt.setMinimumWidth(50)
+
+        backend_options=list(LOADER_REGISTRY[REGISTRY_MAPPING[self.ltype]][self.file_type].keys())
+        self.backend_btn=setup_toolbutton(None,backend_options,tooltips="Backend/Package to load the data")
+        self.backend_btn.setFixedWidth(30)
+
         _ = hstack(
-            layout, [self.name_ledt, self.ltype_cbx, self.refresh_btn]
-        )  # , stretch=[1, 1, 1])
+            layout, [self.path_ledt,self.refresh_btn]
+        )
         _ = hstack(
-            layout, [self.pattern_ledt, self.dtype_cbx, self.delete_btn]
-        )  # , stretch=[1, 1, 1])
+            layout, [self.name_ledt,self.ltype_cbx,self.delete_btn]
+        )
+        _ = hstack(
+            layout, [self.pattern_ledt,self.file_type_cbx,self.backend_btn]
+        )
 
         self.setLayout(main_layout)
         layout.setContentsMargins(5, 5, 5, 5)
@@ -90,33 +110,50 @@ class LayerBlock(QWidget):
         return get_value(self.path_ledt)
 
     @property
-    def dtype(self):
-        return get_value(self.dtype_cbx)[0]
+    def file_type(self):
+        return get_value(self.file_type_cbx)[0]
 
     @property
     def ltype(self):
         return get_value(self.ltype_cbx)[0]
 
+    @property
+    def backend(self):
+        return get_option(self.backend_btn)
+
+    @property
+    def pattern(self):
+        return get_value(self.pattern_ledt)
+
     def get_config(self):
         return {
             "name": get_value(self.name_ledt),
+            "type": get_value(self.ltype_cbx)[0],
             "path": get_value(self.path_ledt),
-            "dtype": get_value(self.dtype_cbx)[0],
+            "file_type": get_value(self.file_type_cbx)[0],
             "pattern": get_value(self.pattern_ledt),
-            "ltype": get_value(self.ltype_cbx)[0],
+            "backend":get_option(self.backend_btn),
         }
 
     def set_config(self, config):
         set_value(self.name_ledt, config["name"])
         set_value(self.path_ledt, config["path"])
-        set_value(self.dtype_cbx, config["dtype"])
+        set_value(self.file_type_cbx, config["file_type"])
+        activate_option(self.backend_btn, config.get("backend",None)) # TODO
         set_value(self.pattern_ledt, config.get("pattern", ""))
-        set_value(self.ltype_cbx, config["ltype"])
+        set_value(self.ltype_cbx, "Labels" if config["type"]=="SemSeg" else config["type"])
+        self.include_names=config.get("include_names")
 
-        # self.refresh()
+    def on_change_ltype(self):
+        self.on_change_file_type()
+
+    def on_change_file_type(self):
+        backend_options=list(LOADER_REGISTRY[REGISTRY_MAPPING[self.ltype]][self.file_type].keys())
+        set_options(self.backend_btn,backend_options)
+        self.on_change()
 
     def on_change(self):
-        self.files = []
+        self.fm = FileManager("","")
 
         _icon = QColoredSVGIcon.from_resources("right_arrow")
 
@@ -125,9 +162,10 @@ class LayerBlock(QWidget):
         self.updated.emit(self)
 
     def refresh(self):
-        self.files = collect_files(self.path, self.dtype, get_value(self.pattern_ledt))
+        #self.files = collect_files(self.path, self.file_type, get_value(self.pattern_ledt))
+        self.fm=FileManager(path=self.path, file_type=self.file_type, pattern=self.pattern,include_names=self.include_names)
 
-        if len(self.files) != 0 and get_value(self.name_ledt) != "":
+        if len(self.fm) != 0 and get_value(self.name_ledt) != "":
             _icon = QColoredSVGIcon.from_resources("check")
             _icon = _icon.colored(color="green")
             self.refresh_btn.setIcon(_icon)
@@ -142,17 +180,24 @@ class LayerBlock(QWidget):
         self.setParent(None)
         self.deleteLater()
 
+    def load_data(self,path):
+        lf=LOADER_REGISTRY[REGISTRY_MAPPING[self.ltype]][self.file_type][self.backend]
+        return lf(path)
+
+
     def __getitem__(self, item):
-        if item < len(self.files):
-            return self.files[item]
+        if  item < len(self.fm):
+            return self.fm[item]
+        else:
+            return None
 
     def __len__(self):
-        return len(self.files)
+        return len(self.fm)
 
 
 def setup_layerblock(
     layout: QLayout,
-    tooltips: Optional[str] = None,
+    tooltips: str | None = None,
     stretch: int = 1,
 ):
     """Create a horizontal switch widget (QHSwitch), configure it, and add it to a layout.
@@ -180,23 +225,3 @@ def setup_layerblock(
         stretch=stretch,
     )
 
-
-if __name__ == "__main__":
-    path_imgs = "/home/l727r/Documents/E132-Rohdaten/nnUNetv2/Dataset181_Kaggle2025_BYU_FlagMot_BartleysData/imagesTr"
-    dtype_imgs = ".nii.gz"
-    patterns_imgs = "*_0000"
-
-    path_gt = "/home/l727r/Documents/E132-Rohdaten/nnUNetv2/Dataset181_Kaggle2025_BYU_FlagMot_BartleysData/labelsTr"
-    dtype_gt = ".nii.gz"
-    patterns_gt = None
-
-    path_pred = "/home/l727r/Documents/cluster-checkpoints-all/isensee/nnUNet_results_kaggle2025_byu/Dataset185_Kaggle2025_BYU_FlagellarMotors_mergedExternalBartley_384/MotorRegressionTrainer_BCEtopK20Loss_moreDA__nnUNetResEncUNetMPlans__3d_fullres_filt16/cv_results_nifti"
-    dtype_pred = ".nii.gz"
-    patterns_pred = "10*__instseg"
-
-    files_imgs = collect_files(path_imgs, dtype_imgs, patterns_imgs)
-    files_gt = collect_files(path_gt, dtype_gt, patterns_gt)
-    files_pred = collect_files(path_pred, dtype_pred, patterns_pred)
-    # print(files_imgs, files_gt, files_pred)
-    for a, b, c in zip(files_imgs, files_gt, files_pred, strict=False):
-        print(a.name, b.name, c.name)

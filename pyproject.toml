@@ -34,6 +34,7 @@ dependencies = [
     "scikit-image",
     "natsort",
 ]
+# TODO add [all]
 
 [project.optional-dependencies]
 testing = [
@@ -42,7 +43,8 @@ testing = [
     "pytest-cov",  # https://pytest-cov.readthedocs.io/en/latest/
     "pytest-qt",  # https://pytest-qt.readthedocs.io/en/latest/
     "napari",
-    "pyqt5",
+    "pyqt5", # TODO
+    "omegaconf",
 ]
 
 [project.entry-points."napari.manifest"]
@@ -92,7 +94,6 @@ lint.ignore = [
     "UP006", "UP007", # type annotation. As using magicgui require runtime type annotation then we disable this.
     "SIM117", # flake8-simplify - some of merged with statements are not looking great with black, reanble after drop python 3.9
 ]
-
 exclude = [
     ".bzr",
     ".direnv",
@@ -117,3 +118,6 @@ exclude = [
 
 target-version = "py310"
 fix = true
+
+[project.scripts]
+data_inspection = "napari_data_inspection._cli:main"

@@ -28,9 +28,10 @@ class DataInspectionWidget_GUI(QWidget):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__()
         self.viewer = viewer
-        self.file_ending = ".nproj"
+        self.file_ending = ".yaml" #".nproj"
         self.index = 0
         self.layer_blocks = []
+        self.meta_config={}
 
         # Build Gui
         self.build_gui()
@@ -122,7 +123,7 @@ class DataInspectionWidget_GUI(QWidget):
         pass
 
     def on_new_layer(self):
-        config = {"name": "", "path": "", "dtype": "", "ltype": "Image"}
+        config = {"name": "", "path": "", "file_type": "", "type": "Image"}
         self.add_layer(config)
 
     # Layer Events
@@ -135,8 +136,7 @@ class DataInspectionWidget_GUI(QWidget):
 
             file = block[self.index]
             if file is not None:
-                #file_name = str(Path(file).name).replace(block.dtype, "")
-                file_name = str(Path(file).relative_to(block.path)).replace(block.dtype,
+                file_name = str(Path(file).relative_to(block.path)).replace(block.file_type,
                                                                                   "")
                 layer_name = f"{block.name} - {self.index} - {file_name}"
                 if layer_name in self.viewer.layers:

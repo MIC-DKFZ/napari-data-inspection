@@ -9,7 +9,7 @@ from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QShortcut
 
 from napari_data_inspection._widget_gui import DataInspectionWidget_GUI
-from napari_data_inspection.utils.data_loading import load_data
+
 
 if TYPE_CHECKING:
     import napari
@@ -141,8 +141,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
         if idx not in self.cache_data[name]:
             file = layer_block[index]
-            #fname = Path(file).name.replace(layer_block.dtype, "")
-            file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.dtype, "")
+            file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.file_type, "")
             layer_name = f"{name} - {index} - {file_name}"
             self.cache_data[name][idx] = self.viewer.layers[layer_name].data
             self.cache_meta[name][idx] = self.viewer.layers[layer_name].affine
@@ -163,7 +162,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
         # schedule the load
         file = layer_block[index]
-        future = self._executor.submit(load_data, file, layer_block.dtype)
+        future = self._executor.submit(layer_block.load_data, file)
         self._cache_futures[name][idx] = future
 
         def _on_done(fut, layer=name, key=idx):
@@ -260,14 +259,14 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         for layer_block in self.layer_blocks:
 
             file = layer_block[self.index]
-            #file_name = str(Path(file).name).replace(layer_block.dtype, "")
-            file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.dtype, "")
-            layer_name = f"{layer_block.name} - {self.index} - {file_name}"
-            if layer_name in self.viewer.layers:
-                del self.viewer.layers[layer_name]
+            if file is not None:
+                file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.file_type, "")
+                layer_name = f"{layer_block.name} - {self.index} - {file_name}"
+                if layer_name in self.viewer.layers:
+                    del self.viewer.layers[layer_name]
 
             self.layer_layout.removeWidget(layer_block)
-            del layer_block
+            layer_block.deleteLater()
 
         self.layer_blocks = []
         self.scroll_area.setWidget(self.layer_container)

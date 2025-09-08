@@ -1,7 +1,8 @@
-import json
 from pathlib import Path
 
+from vidata.config_manager import ConfigManager
 from napari_toolkit.utils import get_value, set_value
+from omegaconf import OmegaConf
 from qtpy.QtWidgets import QFileDialog
 
 from napari_data_inspection._widget_navigation import DataInspectionWidget_LC
@@ -27,17 +28,20 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
             layer_configs = [layer_block.get_config() for layer_block in self.layer_blocks]
 
             config = {
-                "project_name": get_value(self.project_name),
-                "keep_camera": get_value(self.keep_camera),
-                "keep_properties": get_value(self.keep_properties),
-                "prefetch_prev": get_value(self.prefetch_prev),
-                "prefetch_next": get_value(self.prefetch_next),
-                "prefetch_radius": get_value(self.radius),
+                "name": get_value(self.project_name),
                 "layers": layer_configs,
+                "data_inspection": {
+                    "keep_camera": get_value(self.keep_camera),
+                    "keep_properties": get_value(self.keep_properties),
+                    "prefetch_prev": get_value(self.prefetch_prev),
+                    "prefetch_next": get_value(self.prefetch_next),
+                    "prefetch_radius": get_value(self.radius),
+                }
             }
 
-            with Path(config_path).open("w") as f:
-                json.dump(config, f, indent=4)
+            config.update(self.meta_config)
+
+            OmegaConf.save(config, config_path)
         else:
             print("No Valid File Selected")
 
@@ -51,20 +55,30 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
             options=QFileDialog.DontUseNativeDialog,
         )
         if config_path is not None and config_path.endswith(self.file_ending):
-            self.clear_project()
-
-            with Path(config_path).open("r") as f:
-                global_config = json.load(f)
-
-            set_value(self.project_name, global_config["project_name"])
-            set_value(self.keep_camera, global_config.get("keep_camera", False))
-            set_value(self.keep_properties, global_config.get("keep_properties", True))
-            set_value(self.prefetch_prev, global_config.get("prefetch_prev", True))
-            set_value(self.prefetch_next, global_config.get("prefetch_next", True))
-            set_value(self.radius, global_config.get("prefetch_radius", 1))
-
-            for config in global_config["layers"]:
-                self.add_layer(config)
-            self.update_max_len()
+            self._load_yaml_cfg(config_path)
         else:
             print("No Valid File Selected")
+
+
+    def _load_yaml_cfg(self,config_path,split=None,fold=None):
+        self.clear_project()
+
+        global_config=OmegaConf.load(config_path)
+
+        set_value(self.project_name, global_config["name"])
+
+        data_inspection_config = global_config.get("data_inspection",{})
+        set_value(self.keep_camera, data_inspection_config.get("keep_camera", False))
+        set_value(self.keep_properties, data_inspection_config.get("keep_properties", True))
+        set_value(self.prefetch_prev, data_inspection_config.get("prefetch_prev", True))
+        set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
+        set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))
+
+        cnfmgr=ConfigManager(global_config,split=split,fold=fold)
+        for layer in cnfmgr.layers:
+            self.add_layer(layer.config(split=split,fold=fold))
+
+        self.update_max_len()
+
+        self.meta_config = {k:v for k,v in global_config.items() if k not in ["name", "layers", "data_inspection"]}
+

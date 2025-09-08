@@ -1,12 +1,11 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import numpy as np
 from napari.layers import Image, Labels
 from napari_toolkit.utils import get_value
-import numpy as np
 
 from napari_data_inspection._widget_io import DataInspectionWidget_IO
-from napari_data_inspection.utils.data_loading import load_data
 
 if TYPE_CHECKING:
     import napari
@@ -78,8 +77,7 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         camera = None
 
         file = layer_block[index]
-        #file_name = str(Path(file).name).replace(layer_block.dtype, "")
-        file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.dtype, "")
+        file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.file_type, "")
         layer_name = f"{layer_block.name} - {index} - {file_name}"
 
         # Remove previous layer, skip if layer_name already exists
@@ -97,9 +95,10 @@ class DataInspectionWidget(DataInspectionWidget_IO):
 
         if layer_block.name in self.cache_data and str(index) in self.cache_data[layer_block.name]:
             data = self.cache_data[layer_block.name].pop(str(index))
-            affine = self.cache_meta[layer_block.name].pop(str(index))
+            meta = self.cache_meta[layer_block.name].pop(str(index))
         else:
-            data, affine = load_data(file, layer_block.dtype)
+            data, meta = layer_block.load_data(file)
+        affine=meta.get("affine")
 
         if layer_block.ltype == "Image":
             layer = Image(data=data, affine=affine, name=layer_name)
