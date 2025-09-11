@@ -125,6 +125,10 @@ class LayerBlock(QWidget):
     def pattern(self):
         return get_value(self.pattern_ledt)
 
+    @property
+    def files(self):
+        return self.fm.files
+
     def get_config(self):
         return {
             "name": get_value(self.name_ledt),
@@ -139,9 +143,10 @@ class LayerBlock(QWidget):
         set_value(self.name_ledt, config["name"])
         set_value(self.path_ledt, config["path"])
         set_value(self.file_type_cbx, config["file_type"])
-        activate_option(self.backend_btn, config.get("backend",None)) # TODO
-        set_value(self.pattern_ledt, config.get("pattern", ""))
-        set_value(self.ltype_cbx, "Labels" if config["type"]=="SemSeg" else config["type"])
+        activate_option(self.backend_btn, config.get("backend",None))
+        pattern = config.get("pattern", "")
+        set_value(self.pattern_ledt, pattern if pattern is not None else "")
+        set_value(self.ltype_cbx, "Labels" if config["type"].lower()=="semseg" else config["type"])
         self.include_names=config.get("include_names")
 
     def on_change_ltype(self):

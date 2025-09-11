@@ -74,8 +74,8 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
         set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
         set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))
 
-        cnfmgr=ConfigManager(global_config,split=split,fold=fold)
-        for layer in cnfmgr.layers:
+        config_manager=ConfigManager(global_config)
+        for layer in config_manager.layers:
             self.add_layer(layer.config(split=split,fold=fold))
 
         self.update_max_len()

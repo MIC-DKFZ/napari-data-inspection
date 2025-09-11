@@ -39,8 +39,17 @@ class DataInspectionWidget_GUI(QWidget):
     def build_gui(self):
         main_layout = QVBoxLayout()
 
-        # Header
-        _container, _layout = setup_vgroupbox(main_layout, "Project")
+        self.build_gui_header(main_layout)
+        self.build_gui_navigation(main_layout)
+        self.build_gui_prefetching(main_layout)
+        self.build_gui_layers(main_layout)
+
+        setup_acknowledgements(main_layout)
+
+        self.setLayout(main_layout)
+
+    def build_gui_header(self, layout):
+        _container, _layout = setup_vgroupbox(layout, "Project")
         self.project_name = setup_lineedit(_layout, placeholder="Project Name")
 
         # IO
@@ -51,8 +60,8 @@ class DataInspectionWidget_GUI(QWidget):
         lbl = setup_label(None, "")
         hstack(_layout, [cln, lbl])
 
-        # Progressbar
-        _container, _layout = setup_vgroupbox(main_layout, "Navigation")
+    def build_gui_navigation(self,layout):
+        _container, _layout = setup_vgroupbox(layout, "Navigation")
         self.progressbar = setup_progressbaredit(
             _layout, 0, 1, self.index, function=self.on_index_changed
         )
@@ -64,7 +73,8 @@ class DataInspectionWidget_GUI(QWidget):
         self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
         self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
-        _container, _layout = setup_vgroupbox(main_layout, "Prefetching")
+    def build_gui_prefetching(self,layout):
+        _container, _layout = setup_vgroupbox(layout, "Prefetching")
         self.prefetch_prev = setup_checkbox(
             None, "Previous", True, function=self.on_prefetch_prev_changed
         )
@@ -76,13 +86,13 @@ class DataInspectionWidget_GUI(QWidget):
         self.radius = setup_spinbox(None, 1, function=self.on_radius_changed)
         hstack(_layout, [label, self.radius])
 
-        # Add Layer
+    def build_gui_layers(self,layout):
         new_btn = setup_iconbutton(None, "New Layer", "add", function=self.on_new_layer)
         add_btn = setup_iconbutton(None, "Load All", "right_arrow", function=self.on_load_all)
-        _ = hstack(main_layout, [new_btn, add_btn])
+        _ = hstack(layout, [new_btn, add_btn])
 
         # Scroll Area
-        self.scroll_area = setup_scrollarea(main_layout)
+        self.scroll_area = setup_scrollarea(layout)
         self.scroll_area.setWidgetResizable(True)
 
         # Layers
@@ -91,10 +101,6 @@ class DataInspectionWidget_GUI(QWidget):
         self.layer_container.setContentsMargins(5, 5, 5, 5)
 
         self.scroll_area.setWidget(self.layer_container)
-
-        setup_acknowledgements(main_layout)
-
-        self.setLayout(main_layout)
 
     def add_layer(self, config):
 
