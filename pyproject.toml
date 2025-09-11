@@ -33,10 +33,11 @@ dependencies = [
     "tifffile",
     "scikit-image",
     "natsort",
+    "vidata",
 ]
-# TODO add [all]
 
 [project.optional-dependencies]
+all = ["napari[all]"]
 testing = [
     "tox",
     "pytest",  # https://docs.pytest.org/en/latest/contents.html
