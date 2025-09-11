@@ -1,9 +1,9 @@
 from pathlib import Path
 
-from vidata.config_manager import ConfigManager
 from napari_toolkit.utils import get_value, set_value
 from omegaconf import OmegaConf
 from qtpy.QtWidgets import QFileDialog
+from vidata.config_manager import ConfigManager
 
 from napari_data_inspection._widget_navigation import DataInspectionWidget_LC
 
@@ -36,7 +36,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
                     "prefetch_prev": get_value(self.prefetch_prev),
                     "prefetch_next": get_value(self.prefetch_next),
                     "prefetch_radius": get_value(self.radius),
-                }
+                },
             }
 
             config.update(self.meta_config)
@@ -59,26 +59,26 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
         else:
             print("No Valid File Selected")
 
-
-    def _load_yaml_cfg(self,config_path,split=None,fold=None):
+    def _load_yaml_cfg(self, config_path, split=None, fold=None):
         self.clear_project()
 
-        global_config=OmegaConf.load(config_path)
+        global_config = OmegaConf.load(config_path)
 
         set_value(self.project_name, global_config["name"])
 
-        data_inspection_config = global_config.get("data_inspection",{})
+        data_inspection_config = global_config.get("data_inspection", {})
         set_value(self.keep_camera, data_inspection_config.get("keep_camera", False))
         set_value(self.keep_properties, data_inspection_config.get("keep_properties", True))
         set_value(self.prefetch_prev, data_inspection_config.get("prefetch_prev", True))
         set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
         set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))
 
-        config_manager=ConfigManager(global_config)
+        config_manager = ConfigManager(global_config)
         for layer in config_manager.layers:
-            self.add_layer(layer.config(split=split,fold=fold))
+            self.add_layer(layer.config(split=split, fold=fold))
 
         self.update_max_len()
 
-        self.meta_config = {k:v for k,v in global_config.items() if k not in ["name", "layers", "data_inspection"]}
-
+        self.meta_config = {
+            k: v for k, v in global_config.items() if k not in ["name", "layers", "data_inspection"]
+        }

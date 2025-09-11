@@ -17,11 +17,13 @@ pip install napari-data-inspection
 ## Prerequisites
 
 ### Supported File Types
+
 The following file types are supported: `.nii.gz`, `.png`, `.b2nd`, `.nrrd`, `.mha`, `.tif`, `.tiff`.
 If you want to add custom ones add a loader to `src/napari_data_inspection/utils/data_loading.py`.
 
 ### Data Organization Requirements
-Your data should be organized so that different images and different labels can be clearly distinguished—either by placing them in separate folders or by using consistent filename patterns (e.g., *_img for images and *_seg for labels).
+
+Your data should be organized so that different images and different labels can be clearly distinguished—either by placing them in separate folders or by using consistent filename patterns (e.g., \*\_img for images and \*\_seg for labels).
 **The number of files must match across all folders, as they are paired by order.**
 
 ## How to

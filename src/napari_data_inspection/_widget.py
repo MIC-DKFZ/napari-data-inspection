@@ -98,13 +98,13 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             meta = self.cache_meta[layer_block.name].pop(str(index))
         else:
             data, meta = layer_block.load_data(file)
-        affine=meta.get("affine")
+        affine = meta.get("affine")
 
         if layer_block.ltype == "Image":
             layer = Image(data=data, affine=affine, name=layer_name)
         elif layer_block.ltype == "Labels":
             if not np.issubdtype(data.dtype, np.integer):
-                data=data.astype(int)
+                data = data.astype(int)
             layer = Labels(data=data, affine=affine, name=layer_name)
         else:
             return

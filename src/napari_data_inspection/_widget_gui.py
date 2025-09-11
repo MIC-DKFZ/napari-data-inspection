@@ -28,10 +28,10 @@ class DataInspectionWidget_GUI(QWidget):
     def __init__(self, viewer: "napari.viewer.Viewer"):
         super().__init__()
         self.viewer = viewer
-        self.file_ending = ".yaml" #".nproj"
+        self.file_ending = ".yaml"  # ".nproj"
         self.index = 0
         self.layer_blocks = []
-        self.meta_config={}
+        self.meta_config = {}
 
         # Build Gui
         self.build_gui()
@@ -60,7 +60,7 @@ class DataInspectionWidget_GUI(QWidget):
         lbl = setup_label(None, "")
         hstack(_layout, [cln, lbl])
 
-    def build_gui_navigation(self,layout):
+    def build_gui_navigation(self, layout):
         _container, _layout = setup_vgroupbox(layout, "Navigation")
         self.progressbar = setup_progressbaredit(
             _layout, 0, 1, self.index, function=self.on_index_changed
@@ -73,7 +73,7 @@ class DataInspectionWidget_GUI(QWidget):
         self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
         self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
-    def build_gui_prefetching(self,layout):
+    def build_gui_prefetching(self, layout):
         _container, _layout = setup_vgroupbox(layout, "Prefetching")
         self.prefetch_prev = setup_checkbox(
             None, "Previous", True, function=self.on_prefetch_prev_changed
@@ -86,7 +86,7 @@ class DataInspectionWidget_GUI(QWidget):
         self.radius = setup_spinbox(None, 1, function=self.on_radius_changed)
         hstack(_layout, [label, self.radius])
 
-    def build_gui_layers(self,layout):
+    def build_gui_layers(self, layout):
         new_btn = setup_iconbutton(None, "New Layer", "add", function=self.on_new_layer)
         add_btn = setup_iconbutton(None, "Load All", "right_arrow", function=self.on_load_all)
         _ = hstack(layout, [new_btn, add_btn])
@@ -142,8 +142,7 @@ class DataInspectionWidget_GUI(QWidget):
 
             file = block[self.index]
             if file is not None:
-                file_name = str(Path(file).relative_to(block.path)).replace(block.file_type,
-                                                                                  "")
+                file_name = str(Path(file).relative_to(block.path)).replace(block.file_type, "")
                 layer_name = f"{block.name} - {self.index} - {file_name}"
                 if layer_name in self.viewer.layers:
                     del self.viewer.layers[layer_name]
