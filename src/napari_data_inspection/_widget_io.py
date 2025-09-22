@@ -77,7 +77,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
 
         exclude_layers = data_inspection_config.get("exclude_layers",[])
         exclude_layers = exclude_layers if isinstance(exclude_layers, list) else [exclude_layers]
-        config_manager = ConfigManager(global_config)
+        config_manager = ConfigManager(global_config, strict=False)
         for layer in config_manager.layers:
             if layer.name not in exclude_layers:
                 self.add_layer(layer.config(split=split, fold=fold))
