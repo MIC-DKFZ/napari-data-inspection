@@ -85,6 +85,7 @@ The following Extensions and Backends are available.
 - Reader must return (numpy_array, metadata_dict).
 - Registration happens at import time—make sure this module is imported (e.g., from your package’s __init__.py).
 - See [here](https://github.com/MIC-DKFZ/ViData/blob/main/src/vidata/io/image_io.py) for an example.
+- metadata should contain an "affine" if entry, if any spatial transformation should be applied 
 
 ```py 
 # custom_io_template.py  — fill in the TODOs and import this module somewhere at startup.
