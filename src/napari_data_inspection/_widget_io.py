@@ -66,16 +66,21 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
 
         set_value(self.project_name, global_config["name"])
 
-        data_inspection_config = global_config.get("data_inspection", {})
+        data_inspection_config = global_config.get("data_inspection", None)
+        data_inspection_config = data_inspection_config or {}
+
         set_value(self.keep_camera, data_inspection_config.get("keep_camera", False))
         set_value(self.keep_properties, data_inspection_config.get("keep_properties", True))
         set_value(self.prefetch_prev, data_inspection_config.get("prefetch_prev", True))
         set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
         set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))
 
+        exclude_layers = data_inspection_config.get("exclude_layers",[])
+        exclude_layers = exclude_layers if isinstance(exclude_layers, list) else [exclude_layers]
         config_manager = ConfigManager(global_config)
         for layer in config_manager.layers:
-            self.add_layer(layer.config(split=split, fold=fold))
+            if layer.name not in exclude_layers:
+                self.add_layer(layer.config(split=split, fold=fold))
 
         self.update_max_len()
 
