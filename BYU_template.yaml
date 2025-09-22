@@ -1,0 +1,19 @@
+name: BYU - Locating Bacterial Flagellar Motors 2025
+output_dir: path/to/corrected/annotations
+layers:
+- name: Images
+  type: Image
+  path: path/to/your/images
+  file_type: .nii.gz
+  backend: sitk
+- name: GT
+  type: Labels
+  path: path/to/your/labels
+  file_type: .nii.gz
+  backend: sitk
+- name: Prediction
+  type: Labels
+  path: path/to/your/predictions
+  file_type: .nii.gz
+  backend: sitk
+

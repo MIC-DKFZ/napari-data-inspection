@@ -6,9 +6,9 @@ visibility: public
 categories: ["Utilities"]
 contributions:
   commands:
-    - id: napari-data-inspection.DataInspectionWidget
-      python_name: napari_data_inspection:DataInspectionWidget
+    - id: napari-data-inspection.DataInspectionWidgetBYU
+      python_name: napari_data_inspection:DataInspectionWidgetBYU
       title: Data Inspection Widget
   widgets:
-    - command: napari-data-inspection.DataInspectionWidget
+    - command: napari-data-inspection.DataInspectionWidgetBYU
       display_name: Data Inspection Widget
