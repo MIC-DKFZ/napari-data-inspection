@@ -5,7 +5,7 @@ import numpy as np
 from napari.layers import Image, Labels
 from napari_toolkit.utils import get_value
 
-from napari_data_inspection._widget_io import DataInspectionWidget_IO
+from napari_data_inspection.data_inspection._widget_io import DataInspectionWidget_IO
 
 if TYPE_CHECKING:
     import napari

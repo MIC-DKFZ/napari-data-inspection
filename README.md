@@ -1,6 +1,6 @@
 # Napari Data Inspection
 
-A napari plugin for fast, high-throughput inspection of 2D/3D segmentation datasets.  
+A napari plugin for fast, high-throughput inspection of 2D/3D segmentation datasets.
 Select one or more images and/or labels layers; files are paired and loaded automatically so you can browse entire datasets without manual effort.
 
 ## Features
@@ -9,7 +9,6 @@ Select one or more images and/or labels layers; files are paired and loaded auto
 - Prefetching & caching for steamless navigation
 - Supports common formats (e.g., NIfTI, TIFF, PNG, NRRD, MHA, B2ND) out of the box.
 - Extensible loaders (add your own formats if needed).
-
 
 ## Installation
 
@@ -21,16 +20,16 @@ pip install napari-data-inspection[all]
 ```
 
 ## Quickstart
+
 ```
 napari -w napari-data-inspection
 ```
 
 <img src="https://github.com/MIC-DKFZ/napari-data-inspection/raw/main/imgs/GUI.png">
 
-
 # Data organization
 
-- Filter files by patterns (e.g., *_img.nii.gz, *_seg.nii.gz) and/or separate folders per layer.
+- Filter files by patterns (e.g., \*\_img.nii.gz, \*\_seg.nii.gz) and/or separate folders per layer.
 - Number of files must match across layers; pairs are made by sorted order.
 
 ### 1. Separate folders per layer
@@ -59,6 +58,7 @@ Use patterns (globs) per layer.
 ```
 
 Patterns
+
 ```
 Images: *_img.nii.gz
 Labels: *_seg.nii.gz
@@ -66,18 +66,18 @@ Labels: *_seg.nii.gz
 
 ## Supported file types
 
-The data loading is based on the [ViData]("https://github.com/MIC-DKFZ/ViData?tab=readme-ov-file#imaging-and-array-data") package. 
+The data loading is based on the [ViData](%22https://github.com/MIC-DKFZ/ViData?tab=readme-ov-file#imaging-and-array-data%22) package.
 The following Extensions and Backends are available.
 
-| Extension(s)                       | Backend(s)  | Notes                                                                 |
-| ---------------------------------- | ----------- | --------------------------------------------------------------------- |
-| `.png`, `.jpg`, `.jpeg`, `.bmp`    | `imageio`   | Standard 2D image formats                                             |
-| `.tif`, `.tiff`                    | `tifffile`  | Multipage TIFF; high bit-depths supported                             |
-| `.nii.gz`, `.nii`, `.mha`, `.nrrd` | `sitk`      | Medical image formats (3D volumes)                                    |
-| `.nii.gz`, `.nii`                  | `nibabel`   | Alternative medical imaging backend                                   |
-| `.b2nd`                            | `blosc2`    | Compressed N-dimensional arrays                                       |
-| `.b2nd`                            | `blosc2pkl` | Compressed N-dimensional arrays with metadata in a separate `.pkl`    |
-| `.npy`                             | `numpy`     | Single NumPy array                                                    | 
+| Extension(s)                       | Backend(s)  | Notes                                                              |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------ |
+| `.png`, `.jpg`, `.jpeg`, `.bmp`    | `imageio`   | Standard 2D image formats                                          |
+| `.tif`, `.tiff`                    | `tifffile`  | Multipage TIFF; high bit-depths supported                          |
+| `.nii.gz`, `.nii`, `.mha`, `.nrrd` | `sitk`      | Medical image formats (3D volumes)                                 |
+| `.nii.gz`, `.nii`                  | `nibabel`   | Alternative medical imaging backend                                |
+| `.b2nd`                            | `blosc2`    | Compressed N-dimensional arrays                                    |
+| `.b2nd`                            | `blosc2pkl` | Compressed N-dimensional arrays with metadata in a separate `.pkl` |
+| `.npy`                             | `numpy`     | Single NumPy array                                                 |
 
 ### Custom Load Functions
 
@@ -85,9 +85,9 @@ The following Extensions and Backends are available.
 - Reader must return (numpy_array, metadata_dict).
 - Registration happens at import time—make sure this module is imported (e.g., from your package’s __init__.py).
 - See [here](https://github.com/MIC-DKFZ/ViData/blob/main/src/vidata/io/image_io.py) for an example.
-- metadata should contain an "affine" if entry, if any spatial transformation should be applied 
+- metadata should contain an "affine" if entry, if any spatial transformation should be applied
 
-```py 
+```py
 # custom_io_template.py  — fill in the TODOs and import this module somewhere at startup.
 import numpy as np
 from typing import Tuple, Dict, List
@@ -112,6 +112,18 @@ def load_custom(file: str) -> tuple[np.ndarray, dict]:
     return data, meta
 ```
 
+### Torch Dataset Inspection
+
+- Rapid inspection of PyTorch datasets in Napari by browsing images and corresponding labels directly from any torch.utils.data.Dataset
+
+```py
+from napari_data_inspection.dataset_inspection import DatasetInspectionWidget, run_dataset_inspection
+from torch.utils.data import Dataset
+
+# Example: inspect a PyTorch dataset
+dataset = MyCustomDataset(...)  # any torch Dataset
+run_dataset_inspection(dataset, channel_first=True, rescale=True, no_label=False)
+```
 
 # Acknowledgments
 

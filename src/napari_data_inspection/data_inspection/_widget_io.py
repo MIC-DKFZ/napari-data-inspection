@@ -5,7 +5,7 @@ from omegaconf import OmegaConf
 from qtpy.QtWidgets import QFileDialog
 from vidata.config_manager import ConfigManager
 
-from napari_data_inspection._widget_navigation import DataInspectionWidget_LC
+from napari_data_inspection.data_inspection._widget_navigation import DataInspectionWidget_LC
 
 
 class DataInspectionWidget_IO(DataInspectionWidget_LC):
@@ -75,7 +75,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
         set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
         set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))
 
-        exclude_layers = data_inspection_config.get("exclude_layers",[])
+        exclude_layers = data_inspection_config.get("exclude_layers", [])
         exclude_layers = exclude_layers if isinstance(exclude_layers, list) else [exclude_layers]
         config_manager = ConfigManager(global_config, strict=False)
         for layer in config_manager.layers:

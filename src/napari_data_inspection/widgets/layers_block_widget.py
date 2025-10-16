@@ -19,12 +19,7 @@ from napari_toolkit.widgets.buttons.tool_button import (  # make get_value,set_v
     set_options,
 )
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import (
-    QLayout,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from qtpy.QtWidgets import QLayout, QSizePolicy, QVBoxLayout, QWidget
 from vidata import LOADER_REGISTRY
 from vidata.file_manager import FileManager
 

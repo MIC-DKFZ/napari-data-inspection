@@ -8,7 +8,7 @@ from napari_toolkit.utils import get_value, set_value
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QShortcut
 
-from napari_data_inspection._widget_gui import DataInspectionWidget_GUI
+from napari_data_inspection.data_inspection._widget_gui import DataInspectionWidget_GUI
 
 if TYPE_CHECKING:
     import napari
