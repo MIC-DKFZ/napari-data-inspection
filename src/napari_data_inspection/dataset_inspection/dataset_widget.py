@@ -1,16 +1,22 @@
+from typing import TYPE_CHECKING
+
 import napari
 import numpy as np
 from napari.layers import Image, Labels
-from napari_toolkit.containers import setup_scrollarea, setup_vgroupbox
+from napari_toolkit.containers import setup_vgroupbox
 from napari_toolkit.containers.boxlayout import hstack
-from napari_toolkit.utils import get_value, set_value
-from napari_toolkit.widgets import (setup_acknowledgements, setup_checkbox,
-                                    setup_iconbutton, setup_label,
-                                    setup_lineedit, setup_progressbaredit,
-                                    setup_pushbutton, setup_spinbox)
-from qtpy.QtWidgets import QSizePolicy, QVBoxLayout, QWidget
+from napari_toolkit.utils import get_value
+from napari_toolkit.widgets import (
+    setup_acknowledgements,
+    setup_checkbox,
+    setup_progressbaredit,
+    setup_pushbutton,
+)
+from qtpy.QtGui import QKeySequence
+from qtpy.QtWidgets import QShortcut, QSizePolicy, QVBoxLayout, QWidget
 
-from napari_data_inspection.widgets.layers_block_widget import setup_layerblock
+if TYPE_CHECKING:
+    import torch
 
 
 class DatasetInspectionWidget(QWidget):
@@ -38,6 +44,16 @@ class DatasetInspectionWidget(QWidget):
 
         # Build Gui
         self.build_gui()
+
+        # Key bindings …
+        key_d = QShortcut(QKeySequence("d"), self)
+        key_d.activated.connect(self.progressbar.increment_value)
+        self.progressbar.next_button.setToolTip("Press [d] for next")
+        key_a = QShortcut(QKeySequence("a"), self)
+        key_a.activated.connect(self.progressbar.decrement_value)
+        self.progressbar.prev_button.setToolTip("Press [a] for previous")
+        key_q = QShortcut(QKeySequence("q"), self)
+        key_q.activated.connect(self.viewer.close)
 
         self.on_index_changed()
 
@@ -72,6 +88,8 @@ class DatasetInspectionWidget(QWidget):
 
         img = data[0] if isinstance(data, tuple) else data
         lbl = data[1] if isinstance(data, tuple) and not get_value(self.no_label_ckbx) else None
+        meta = data[2] if isinstance(data, tuple) and len(data) > 2 else None
+        name = meta["file_name"] if isinstance(meta, dict) and "file_name" in meta else index
 
         img = np.array(img) if not isinstance(img, np.ndarray) else img
 
@@ -85,17 +103,17 @@ class DatasetInspectionWidget(QWidget):
         # --- Image ---
         if self.img_layer is not None:
             self.img_layer.data = img
-            self.img_layer.name = f"Image_{index}"
+            self.img_layer.name = f"Image_{name}"
         else:
-            self.img_layer = Image(data=img, name=f"Image_{index}")
+            self.img_layer = Image(data=img, name=f"Image_{name}")
             self.viewer.add_layer(self.img_layer)
         # --- Label --- #
         if lbl is not None:
             if self.label_layer is not None:
                 self.label_layer.data = lbl
-                self.label_layer.name = f"Label_{index}"
+                self.label_layer.name = f"Label_{name}"
             else:
-                self.label_layer = Labels(data=lbl, name=f"Label_{index}")
+                self.label_layer = Labels(data=lbl, name=f"Label_{name}")
                 self.viewer.add_layer(self.label_layer)
 
     def reload(self):
