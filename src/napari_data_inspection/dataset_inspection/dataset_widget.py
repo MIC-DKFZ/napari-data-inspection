@@ -11,9 +11,12 @@ from napari_toolkit.widgets import (
     setup_checkbox,
     setup_progressbaredit,
     setup_pushbutton,
+    setup_spinbox,
+    setup_label,
 )
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QShortcut, QSizePolicy, QVBoxLayout, QWidget
+from napari.utils.colormaps import label_colormap
 
 if TYPE_CHECKING:
     import torch
@@ -28,6 +31,7 @@ class DatasetInspectionWidget(QWidget):
         channel_first: bool = True,
         rescale: bool = False,
         no_label: bool = False,
+        bg_class: int = 0,
     ):
         super().__init__()
         self.viewer = viewer
@@ -38,6 +42,7 @@ class DatasetInspectionWidget(QWidget):
         self.channel_first = channel_first
         self.rescale = rescale
         self.no_label = no_label
+        self.bg_class = bg_class
 
         self.img_layer = None
         self.label_layer = None
@@ -72,15 +77,20 @@ class DatasetInspectionWidget(QWidget):
         )
         self.progressbar.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
-        # self.RGB = setup_checkbox(_layout, "RGB", True)
         self.channel_first_ckbx = setup_checkbox(
             None, "Channel First", self.channel_first, self.reload
         )
         self.rescale_ckbx = setup_checkbox(None, "Rescale", self.rescale, self.reload)
         self.no_label_ckbx = setup_checkbox(None, "No Label", self.no_label, self.reload)
         hstack(_layout, [self.channel_first_ckbx, self.rescale_ckbx, self.no_label_ckbx])
+
+        lbl = setup_label(None, "BG Class:")
+        self.bg_spin_box = setup_spinbox(
+            None, 0, 255, default=self.bg_class, function=self.change_cm
+        )
+        hstack(_layout, [lbl, self.bg_spin_box])
+
         _ = setup_pushbutton(_layout, "Refresh", self.on_index_changed)
-        # self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
     def on_index_changed(self):
         index = get_value(self.progressbar)
@@ -113,7 +123,10 @@ class DatasetInspectionWidget(QWidget):
                 self.label_layer.data = lbl
                 self.label_layer.name = f"Label_{name}"
             else:
-                self.label_layer = Labels(data=lbl, name=f"Label_{name}")
+                cm = label_colormap(
+                    num_colors=49, seed=0.5, background_value=get_value(self.bg_spin_box)
+                )
+                self.label_layer = Labels(data=lbl, name=f"Label_{name}", colormap=cm)
                 self.viewer.add_layer(self.label_layer)
 
     def reload(self):
@@ -127,6 +140,13 @@ class DatasetInspectionWidget(QWidget):
         self.img_layer = None
 
         self.on_index_changed()
+
+    def change_cm(self):
+        if self.label_layer is not None:
+            cm = label_colormap(
+                num_colors=49, seed=0.5, background_value=get_value(self.bg_spin_box)
+            )
+            self.label_layer.colormap = cm
 
 
 def run_dataset_inspection(dataset: "torch.utils.data.Dataset", *args, **kwargs):

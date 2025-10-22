@@ -122,7 +122,7 @@ from torch.utils.data import Dataset
 
 # Example: inspect a PyTorch dataset
 dataset = MyCustomDataset(...)  # any torch Dataset
-run_dataset_inspection(dataset, channel_first=True, rescale=True, no_label=False)
+run_dataset_inspection(dataset, channel_first=True, rescale=True, no_label=False, bg_class=0)
 ```
 
 # Acknowledgments
