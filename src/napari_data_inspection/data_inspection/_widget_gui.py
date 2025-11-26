@@ -136,14 +136,14 @@ class DataInspectionWidget_GUI(QWidget):
     def on_layer_loaded(self):
         pass
 
-    def on_layer_removed(self, block):
-        index = self.layer_blocks.index(block)
+    def on_layer_removed(self, layer_block):
+        index = self.layer_blocks.index(layer_block)
         if 0 <= index < len(self.layer_blocks):
 
-            file = block[self.index]
+            file = layer_block[self.index]
             if file is not None:
-                file_name = str(Path(file).relative_to(block.path)).replace(block.file_type, "")
-                layer_name = f"{block.name} - {self.index} - {file_name}"
+                file_name = layer_block.fm.name_from_path(file)
+                layer_name = f"{layer_block.name} - {self.index} - {file_name}"
                 if layer_name in self.viewer.layers:
                     del self.viewer.layers[layer_name]
             del self.layer_blocks[index]

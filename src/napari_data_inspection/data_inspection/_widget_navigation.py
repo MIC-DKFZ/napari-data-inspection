@@ -140,9 +140,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
         if idx not in self.cache_data[name]:
             file = layer_block[index]
-            file_name = str(Path(file).relative_to(layer_block.path)).replace(
-                layer_block.file_type, ""
-            )
+            file_name = layer_block.fm.name_from_path(file)
             layer_name = f"{name} - {index} - {file_name}"
             self.cache_data[name][idx] = self.viewer.layers[layer_name].data
             self.cache_meta[name][idx] = self.viewer.layers[layer_name].affine
@@ -261,9 +259,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
 
             file = layer_block[self.index]
             if file is not None:
-                file_name = str(Path(file).relative_to(layer_block.path)).replace(
-                    layer_block.file_type, ""
-                )
+                file_name = layer_block.fm.name_from_path(file)
                 layer_name = f"{layer_block.name} - {self.index} - {file_name}"
                 if layer_name in self.viewer.layers:
                     del self.viewer.layers[layer_name]

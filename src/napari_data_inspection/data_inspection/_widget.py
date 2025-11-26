@@ -77,7 +77,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         camera = None
 
         file = layer_block[index]
-        file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.file_type, "")
+
+        file_name = layer_block.fm.name_from_path(file)
         layer_name = f"{layer_block.name} - {index} - {file_name}"
 
         # Remove previous layer, skip if layer_name already exists
