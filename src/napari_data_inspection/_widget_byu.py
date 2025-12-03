@@ -1,6 +1,12 @@
 from qtpy.QtWidgets import QVBoxLayout
 from napari_data_inspection import DataInspectionWidget
-from napari_toolkit.widgets import setup_acknowledgements, setup_lineedit,setup_togglebutton,setup_pushbutton,setup_label
+from napari_toolkit.widgets import (
+    setup_acknowledgements,
+    setup_lineedit,
+    setup_togglebutton,
+    setup_pushbutton,
+    setup_label,
+)
 from napari_toolkit.containers import setup_vgroupbox
 from napari_toolkit.containers.boxlayout import hstack
 from napari_toolkit.utils import get_value
@@ -10,6 +16,7 @@ from qtpy.QtWidgets import QShortcut
 import numpy as np
 
 from vidata.io import save_sitk
+
 
 class DataInspectionWidgetBYU(DataInspectionWidget):
 
@@ -30,7 +37,6 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
         key_r = QShortcut(QKeySequence("r"), self)
         key_r.activated.connect(toggle_rem)
 
-
     def build_gui(self):
         main_layout = QVBoxLayout()
 
@@ -44,7 +50,7 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
 
         self.setLayout(main_layout)
 
-    def build_gui_byu(self,main_layout):
+    def build_gui_byu(self, main_layout):
         # Project Kaggle2025_BYU
         _container, _layout = setup_vgroupbox(main_layout, "Kaggle2025_BYU")
         self.add_btn = setup_togglebutton(None, "Add Instance", function=self.on_add_instance)
@@ -62,18 +68,19 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
     def load_data(self, layer_block, index):
         super().load_data(layer_block, index)
 
-        if layer_block.name in ["GT","Prediction"]:
+        if layer_block.name in ["GT", "Prediction"]:
             file = layer_block[index]
-            file_name = str(Path(file).relative_to(layer_block.path)).replace(layer_block.file_type, "")
+            file_name = str(Path(file).relative_to(layer_block.path)).replace(
+                layer_block.file_type, ""
+            )
             layer_name = f"{layer_block.name} - {index} - {file_name}"
 
-            data=self.viewer.layers[layer_name].data
+            data = self.viewer.layers[layer_name].data
             max_i = np.max(data)
-            if layer_block.name=="GT":
+            if layer_block.name == "GT":
                 self.num_gt.setText(f"Instances in GT: {max_i}")
-            elif layer_block.name=="Prediction":
+            elif layer_block.name == "Prediction":
                 self.num_pred.setText(f"Instances in Pred: {max_i}")
-
 
     def get_layerblock_by_name(self, blockname):
         layer_block = [block for block in self.layer_blocks if block.name == blockname]
@@ -165,7 +172,6 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
                 layer_copy.mode = "pan_zoom"
                 layer_copy.mouse_drag_callbacks.remove(self.mouse_rem_callback)
 
-
     def mouse_rem_callback(self, layer, event):
         if layer.mode == "pick" and event.type == "mouse_press":
             self.rem_btn.setChecked(False)
@@ -175,10 +181,10 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
             coords = tuple(int(round(c)) for c in event.position)
             arr = layer.data
             value = arr[coords]
-            arr[arr == value] = 0
-            arr[arr > value] -= 1
-            layer.data = arr
-
+            if value != 0:
+                arr[arr == value] = 0
+                arr[arr > value] -= 1
+                layer.data = arr
 
     def refresh(self):
         super().refresh()
