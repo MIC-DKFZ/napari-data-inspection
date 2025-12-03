@@ -14,7 +14,7 @@ from pathlib import Path
 from qtpy.QtGui import QKeySequence
 from qtpy.QtWidgets import QShortcut
 import numpy as np
-
+import json
 from vidata.io import save_sitk
 
 
@@ -62,8 +62,37 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
             placeholder="Output Directory",
         )
         hstack(_layout, [self.output_dir, btn3])
+        _ = setup_pushbutton(
+            _layout, "Mark as Uncertain", function=self.on_markas_uncertain, shortcut="M"
+        )
+
         self.num_gt = setup_label(_layout, "Instances in GT:")
         self.num_pred = setup_label(_layout, "Instances in Prediction:")
+
+    def on_markas_uncertain(self):
+        layer_block = self.get_layerblock_by_name("Images")
+
+        output_dir = get_value(self.output_dir)
+        if output_dir == "":
+            print("You need to define a Output directory")
+            return
+
+        output_file = Path(output_dir).joinpath("uncertain_cases.json")
+        index = get_value(self.progressbar)
+        file = layer_block[index]
+        file = file.name
+
+        if output_file.exists():
+            with open(output_file) as f:
+                data = json.load(f)
+        else:
+            data = []
+
+        if file not in data:
+            data.append(file)
+
+        with open(output_file, "w") as f:
+            json.dump(data, f, indent=2)
 
     def load_data(self, layer_block, index):
         super().load_data(layer_block, index)
@@ -78,9 +107,9 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
             data = self.viewer.layers[layer_name].data
             max_i = np.max(data)
             if layer_block.name == "GT":
-                self.num_gt.setText(f"Instances in GT: {max_i}")
+                self.num_gt.setText(f"Instances in GT:              {max_i}")
             elif layer_block.name == "Prediction":
-                self.num_pred.setText(f"Instances in Pred: {max_i}")
+                self.num_pred.setText(f"Instances in Prediction:   {max_i}")
 
     def get_layerblock_by_name(self, blockname):
         layer_block = [block for block in self.layer_blocks if block.name == blockname]
@@ -199,7 +228,8 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
 
         layer_copy_name = layer_name.replace("GT", "GT_corrected")
         if layer_copy_name not in self.viewer.layers:
-            raise ValueError(f"no layer: {layer_copy_name}")
+            layer_copy = self.maybe_copy_layer(layer_name, layer_copy_name)
+            # raise ValueError(f"no layer: {layer_copy_name}")
 
         output_dir = get_value(self.output_dir)
         if output_dir == "":
