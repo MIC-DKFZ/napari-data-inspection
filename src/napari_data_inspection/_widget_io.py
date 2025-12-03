@@ -33,7 +33,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
                 "output_dir": get_value(self.output_dir),
                 "data_inspection": {
                     "keep_camera": get_value(self.keep_camera),
-                    "keep_properties": get_value(self.keep_properties),
+                    # "keep_properties": get_value(self.keep_properties),
                     "prefetch_prev": get_value(self.prefetch_prev),
                     "prefetch_next": get_value(self.prefetch_next),
                     "prefetch_radius": get_value(self.radius),
@@ -71,7 +71,7 @@ class DataInspectionWidget_IO(DataInspectionWidget_LC):
         data_inspection_config = data_inspection_config or {}
 
         set_value(self.keep_camera, data_inspection_config.get("keep_camera", False))
-        set_value(self.keep_properties, data_inspection_config.get("keep_properties", True))
+        # set_value(self.keep_properties, data_inspection_config.get("keep_properties", True))
         set_value(self.prefetch_prev, data_inspection_config.get("prefetch_prev", True))
         set_value(self.prefetch_next, data_inspection_config.get("prefetch_next", True))
         set_value(self.radius, data_inspection_config.get("prefetch_radius", 1))

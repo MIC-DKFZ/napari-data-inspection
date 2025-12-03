@@ -70,7 +70,7 @@ class DataInspectionWidget_GUI(QWidget):
             _layout, placeholder="Enter Filename ...", function=self.on_name_entered
         )
 
-        self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
+        # self.keep_properties = setup_checkbox(_layout, "Keep Layer Properties", True)
         self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
 
     def build_gui_prefetching(self, layout):
@@ -163,7 +163,7 @@ class DataInspectionWidget_GUI(QWidget):
         set_value(self.progressbar, self.index)
         set_value(self.project_name, "")
         set_value(self.search_name, "")
-        set_value(self.keep_properties, True)
+        # set_value(self.keep_properties, True)
         set_value(self.keep_camera, False)
         set_value(self.prefetch_prev, True)
         set_value(self.prefetch_next, True)
