@@ -46,7 +46,6 @@ class DataInspectionWidget(DataInspectionWidget_IO):
                 layer = Labels(data=data, affine=affine, name=layer_name)
             else:
                 return
-            self.set_layer_properties(layer, props)
             self.viewer.add_layer(layer)
         else:
             target_layer = target_layer[0]

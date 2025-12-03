@@ -144,7 +144,7 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
             layer_name = f"{name} - {index} - {file_name}"
             if layer_name in self.viewer.layers:
                 self.cache_data[name][idx] = self.viewer.layers[layer_name].data
-                self.cache_meta[name][idx] = self.viewer.layers[layer_name].affine
+                self.cache_meta[name][idx] = {"affine": self.viewer.layers[layer_name].affine}
 
     # New: schedules via Future instead of raw Thread
     def fill_cache(self, layer_block, index):
