@@ -160,26 +160,27 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
         if name not in self._cache_futures:
             self._cache_futures[name] = {}
 
-        # schedule the load
-        file = layer_block[index]
-        future = self._executor.submit(layer_block.load_data, file)
-        self._cache_futures[name][idx] = future
+        # schedule the load - only if not already sheduled and data is not already in cache
+        if str(idx) not in self._cache_futures[name] and str(idx) not in self.cache_data[name]:
+            file = layer_block[index]
+            future = self._executor.submit(layer_block.load_data, file)
+            self._cache_futures[name][idx] = future
 
-        def _on_done(fut, layer=name, key=idx):
-            try:
-                if fut.cancelled():
-                    return
-                data, affine = fut.result()
-                self.cache_data[layer][key] = data
-                self.cache_meta[layer][key] = affine
-            except CancelledError:
-                pass
-            except Exception as e:  # noqa: BLE001
-                print(f"Prefetch callback error for {layer}[{key}]: {e}")
-            finally:
-                self._cache_futures[layer].pop(key, None)
+            def _on_done(fut, layer=name, key=idx):
+                try:
+                    if fut.cancelled():
+                        return
+                    data, affine = fut.result()
+                    self.cache_data[layer][key] = data
+                    self.cache_meta[layer][key] = affine
+                except CancelledError:
+                    pass
+                except Exception as e:  # noqa: BLE001
+                    print(f"Prefetch callback error for {layer}[{key}]: {e}")
+                finally:
+                    self._cache_futures[layer].pop(key, None)
 
-        future.add_done_callback(_on_done)
+            future.add_done_callback(_on_done)
 
     def _prune_caches_and_futures(self, current_idx):
 

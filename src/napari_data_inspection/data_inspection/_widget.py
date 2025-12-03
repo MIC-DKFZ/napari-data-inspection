@@ -33,6 +33,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         else:
             data, meta = layer_block.load_data(file)
         affine = meta.get("affine")
+        if layer_block.ltype == "Labels" and not np.issubdtype(data.dtype, np.integer):
+            data = data.astype(int)
 
         target_layer = [
             layer for layer in self.viewer.layers if layer.name.startswith(f"{layer_block.name} - ")
@@ -41,8 +43,6 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             if layer_block.ltype == "Image":
                 layer = Image(data=data, affine=affine, name=layer_name)
             elif layer_block.ltype == "Labels":
-                if not np.issubdtype(data.dtype, np.integer):
-                    data = data.astype(int)
                 layer = Labels(data=data, affine=affine, name=layer_name)
             else:
                 return
@@ -55,6 +55,6 @@ class DataInspectionWidget(DataInspectionWidget_IO):
 
         if not get_value(self.keep_camera):
             self.viewer.reset_view()
-            if self.viewer.layers[layer_name].ndim == 3:  # and viewer.dims.ndisplay == 2:
+            if self.viewer.layers[layer_name].ndim == 3:
                 mid = self.viewer.layers[layer_name].data.shape[0] // 2
                 self.viewer.dims.set_point(0, mid)
