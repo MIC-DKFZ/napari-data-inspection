@@ -19,8 +19,6 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         self.cache_meta = {}
 
     def load_data(self, layer_block, index):
-        props = {}
-        camera = None
 
         file = layer_block[index]
 
@@ -32,7 +30,14 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             meta = self.cache_meta[layer_block.name].pop(str(index))
         else:
             data, meta = layer_block.load_data(file)
-        affine = meta.get("affine") if not get_value(self.ignore_affine) else np.eye(data.ndim + 1)
+        affine = meta.get(
+            "affine"
+        )  # if not get_value(self.ignore_affine) else np.eye(data.ndim + 1)
+        affine_to_use = (
+            affine
+            if affine is not None and not get_value(self.ignore_affine)
+            else np.eye(data.ndim + 1)
+        )
 
         if layer_block.ltype == "Labels" and not np.issubdtype(data.dtype, np.integer):
             data = data.astype(int)
@@ -42,9 +47,13 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         ]
         if len(target_layer) == 0:
             if layer_block.ltype == "Image":
-                layer = Image(data=data, affine=affine, name=layer_name)
+                layer = Image(
+                    data=data, affine=affine_to_use, name=layer_name, metadata={"affine": affine}
+                )
             elif layer_block.ltype == "Labels":
-                layer = Labels(data=data, affine=affine, name=layer_name)
+                layer = Labels(
+                    data=data, affine=affine_to_use, name=layer_name, metadata={"affine": affine}
+                )
             else:
                 return
             self.viewer.add_layer(layer)
@@ -52,7 +61,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             target_layer = target_layer[0]
             target_layer.name = layer_name
             target_layer.data = data
-            target_layer.affine = affine
+            target_layer.affine = affine_to_use
+            target_layer.metadata = {"affine": affine}
 
         if not get_value(self.keep_camera):
             self.viewer.reset_view()

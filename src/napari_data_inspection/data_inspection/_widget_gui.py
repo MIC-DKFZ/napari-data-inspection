@@ -71,7 +71,7 @@ class DataInspectionWidget_GUI(QWidget):
         )
         self.keep_camera = setup_checkbox(None, "Keep Camera", False)
         self.ignore_affine = setup_checkbox(
-            None, "Ignore Affine", False, function=self.on_index_changed
+            None, "Ignore Affine", False, function=self.on_change_affine
         )
         hstack(_layout, [self.keep_camera, self.ignore_affine])
 
@@ -151,6 +151,9 @@ class DataInspectionWidget_GUI(QWidget):
             del self.layer_blocks[index]
 
     def on_layer_updated(self):
+        pass
+
+    def on_change_affine(self):
         pass
 
     # IO Events

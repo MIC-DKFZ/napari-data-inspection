@@ -38,6 +38,14 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
     def on_index_changed(self):
         self.refresh()
 
+    def on_change_affine(self):
+        for layer in self.viewer.layers:
+            if get_value(self.ignore_affine):
+                affine_to_use = np.eye(layer.data.ndim)
+            else:
+                affine_to_use = layer.metadata.get("affine")
+            layer.affine = affine_to_use
+
     def on_name_entered(self):
         _name = get_value(self.search_name)
         for layer_block in self.layer_blocks:
@@ -144,7 +152,9 @@ class DataInspectionWidget_LC(DataInspectionWidget_GUI):
             layer_name = f"{name} - {index} - {file_name}"
             if layer_name in self.viewer.layers:
                 self.cache_data[name][idx] = self.viewer.layers[layer_name].data
-                self.cache_meta[name][idx] = {"affine": self.viewer.layers[layer_name].affine}
+                self.cache_meta[name][idx] = {
+                    "affine": self.viewer.layers[layer_name].metadata["affine"]
+                }
 
     # New: schedules via Future instead of raw Thread
     def fill_cache(self, layer_block, index):
