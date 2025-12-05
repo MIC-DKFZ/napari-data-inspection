@@ -128,7 +128,11 @@ class DataInspectionWidgetBYU(DataInspectionWidget):
     def maybe_copy_layer(self, layer_name, layer_copy_name):
         if layer_copy_name not in self.viewer.layers:
             layer = self.viewer.layers[layer_name]
-            layer_copy = layer.__class__(**layer._get_state().copy())
+            data = np.array(layer.data, copy=True)
+            state = layer._get_base_state()
+            layer_copy = layer.__class__(data, **state)
+            # layer_copy = layer.__class__(**layer._get_state().copy())
+            # print(layer._get_state())
             layer_copy.name = layer_copy_name
             self.viewer.add_layer(layer_copy)
             layer_copy.brush_size = 10
