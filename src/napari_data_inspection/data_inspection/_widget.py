@@ -67,5 +67,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
         if not get_value(self.keep_camera):
             self.viewer.reset_view()
             if self.viewer.layers[layer_name].ndim == 3:
-                mid = self.viewer.layers[layer_name].data.shape[0] // 2
-                self.viewer.dims.set_point(0, mid)
+                slice_axis = self.viewer.dims.order[0]
+                mid = self.viewer.layers[layer_name].data.shape[slice_axis] // 2
+                current_step = list(self.viewer.dims.current_step)
+                current_step[slice_axis] = mid
+                self.viewer.dims.current_step = current_step
