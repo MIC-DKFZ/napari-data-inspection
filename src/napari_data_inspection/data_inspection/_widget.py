@@ -32,7 +32,8 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             meta = self.cache_meta[layer_block.name].pop(str(index))
         else:
             data, meta = layer_block.load_data(file)
-        affine = meta.get("affine")
+        affine = meta.get("affine") if not get_value(self.ignore_affine) else np.eye(data.ndim + 1)
+
         if layer_block.ltype == "Labels" and not np.issubdtype(data.dtype, np.integer):
             data = data.astype(int)
 

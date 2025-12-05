@@ -69,7 +69,11 @@ class DataInspectionWidget_GUI(QWidget):
         self.search_name = setup_lineedit(
             _layout, placeholder="Enter Filename ...", function=self.on_name_entered
         )
-        self.keep_camera = setup_checkbox(_layout, "Keep Camera", False)
+        self.keep_camera = setup_checkbox(None, "Keep Camera", False)
+        self.ignore_affine = setup_checkbox(
+            None, "Ignore Affine", False, function=self.on_index_changed
+        )
+        hstack(_layout, [self.keep_camera, self.ignore_affine])
 
     def build_gui_prefetching(self, layout):
         _container, _layout = setup_vgroupbox(layout, "Prefetching")
