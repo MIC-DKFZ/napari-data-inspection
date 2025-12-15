@@ -59,6 +59,7 @@ class DataInspectionWidget(DataInspectionWidget_IO):
             self.viewer.add_layer(layer)
         else:
             target_layer = target_layer[0]
+            target_layer._keep_auto_contrast = get_value(self.auto_contrast)
             target_layer.name = layer_name
             target_layer.data = data
             target_layer.affine = affine_to_use

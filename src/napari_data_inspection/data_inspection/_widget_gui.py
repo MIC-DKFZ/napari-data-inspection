@@ -74,6 +74,7 @@ class DataInspectionWidget_GUI(QWidget):
             None, "Ignore Affine", False, function=self.on_change_affine
         )
         hstack(_layout, [self.keep_camera, self.ignore_affine])
+        self.auto_contrast = setup_checkbox(_layout, "Auto Contrast", True)
 
     def build_gui_prefetching(self, layout):
         _container, _layout = setup_vgroupbox(layout, "Prefetching")
